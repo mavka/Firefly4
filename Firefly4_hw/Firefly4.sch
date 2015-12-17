@@ -588,11 +588,11 @@ Text Label 8900 4550 0    60   ~ 0
 LED_G
 Text Label 8900 4750 0    60   ~ 0
 LED_B
-Text Label 7850 1800 2    60   ~ 0
-LED_R
 Text Label 7850 1900 2    60   ~ 0
-LED_G
+LED_R
 Text Label 4500 1200 0    60   ~ 0
+LED_G
+Text Label 7850 1800 2    60   ~ 0
 LED_B
 Text Label 4500 1300 0    60   ~ 0
 DINO
