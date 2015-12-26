@@ -182,6 +182,7 @@ public:
     // Frequency values
     uint32_t AHBFreqHz;     // HCLK: AHB Bus, Core, Memory, DMA; 48 MHz max
     uint32_t APBFreqHz;     // PCLK: APB Bus clock; 48 MHz max
+    uint8_t TimerClkMulti = 1;
     // SysClk switching
     uint8_t SwitchTo(ClkSrc_t AClkSrc);
     void EnableCSS()  { RCC->CR |=  RCC_CR_CSSON; }
@@ -189,6 +190,7 @@ public:
     void DisableHSE() { RCC->CR &= ~RCC_CR_HSEON; }
     void DisableHSI() { RCC->CR &= ~RCC_CR_HSION; }
     void DisablePLL() { RCC->CR &= ~RCC_CR_PLLON; }
+    void DisableHSI48() { RCC->CR2 &= RCC_CR2_HSI48ON; }
     void SetupBusDividers(AHBDiv_t AHBDiv, APBDiv_t APBDiv);
     uint8_t SetupPLLDividers(uint8_t HsePreDiv, PllMul_t PllMul);
     void UpdateFreqValues();

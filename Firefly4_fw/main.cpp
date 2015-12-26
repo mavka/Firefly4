@@ -6,6 +6,7 @@
  */
 
 #include "main.h"
+#include "SimpleSensors.h"
 
 App_t App;
 
@@ -13,12 +14,9 @@ int main(void) {
 
     // ==== Setup clock frequency ====
 //    uint8_t ClkResult = 1;
-//    SetupVCore(vcore1V8);
-//    Clk.SetupFlashLatency(32);  // Setup Flash Latency for clock in MHz
-//    Clk.SetupPLLMulDiv(pllMul8, pllDiv3);
-//    Clk.SetupBusDividers(ahbDiv1, apbDiv1, apbDiv1);
-//    ClkResult = Clk.SwitchToPLL();
-     Clk.UpdateFreqValues();
+    Clk.EnablePrefetch();
+    Clk.SetupBusDividers(ahbDiv2, apbDiv1);
+    Clk.UpdateFreqValues();
 
     // Init OS
     halInit();
@@ -30,8 +28,10 @@ int main(void) {
     Uart.Printf("\r%S %S\r", APP_NAME, APP_VERSION);
     Clk.PrintFreqs();
 //    if(ClkResult != 0) Uart.Printf("XTAL failure\r");
+    chThdSleepMilliseconds(450);
 
-//    App.InitThread();
+    App.InitThread();
+    PinSensors.Init();
 
     // Main cycle
     App.ITask();
@@ -40,7 +40,24 @@ int main(void) {
 __attribute__ ((__noreturn__))
 void App_t::ITask() {
     while(true) {
-//        uint32_t EvtMsk = chEvtWaitAny(ALL_EVENTS);
-        chThdSleepMilliseconds(999);
+        uint32_t EvtMsk = chEvtWaitAny(ALL_EVENTS);
+        if(EvtMsk & EVTMSK_USB_CONNECTED) {
+            Uart.Printf("5v is here\r");
+            chThdSleepMilliseconds(450);
+            // Enable HSI48
+            chSysLock();
+            uint8_t r = Clk.SwitchTo(csHSI48);
+            Clk.UpdateFreqValues();
+            Uart.OnAHBFreqChange();
+            chSysUnlock();
+            if(r != OK) Uart.Printf("Hsi Fail\r");
+            Clk.PrintFreqs();
+        }
     } // while true
+}
+
+// 5v Sns
+void Process5VSns(PinSnsState_t *PState, uint32_t Len) {
+    if(PState[0] == pssRising) App.SignalEvt(EVTMSK_USB_CONNECTED);
+    else if(PState[0] == pssFalling) App.SignalEvt(EVTMSK_USB_DISCONNECTED);
 }

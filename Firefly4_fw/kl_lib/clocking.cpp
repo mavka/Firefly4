@@ -12,7 +12,7 @@
 
 Clk_t Clk;
 
-#define CLK_STARTUP_TIMEOUT     2007
+#define CLK_STARTUP_TIMEOUT     20007
 
 #if defined STM32L1XX
 // ==== Inner use ====
@@ -258,6 +258,16 @@ uint8_t Clk_t::EnablePLL() {
     return 1; // Timeout
 }
 
+uint8_t Clk_t::EnableHSI48() {
+    RCC->CR2 |= RCC_CR2_HSI48ON;
+    uint32_t StartUpCounter=0;
+    do {
+        if(RCC->CR2 & RCC_CR2_HSI48RDY) return 0;   // PLL is ready
+        StartUpCounter++;
+    } while(StartUpCounter < CLK_STARTUP_TIMEOUT);
+    return 1; // Timeout
+}
+
 void Clk_t::UpdateFreqValues() {
     uint32_t tmp, PllSrc, PreDiv, PllMul;
     uint32_t SysClkHz = HSI_FREQ_HZ;
@@ -282,7 +292,10 @@ void Clk_t::UpdateFreqValues() {
             }
             SysClkHz *= PllMul;
             break;
+
+        case csHSI48: SysClkHz = HSI48_FREQ_HZ; break;
     } // switch
+
     // AHB freq
     const uint8_t AHBPrescTable[16] = {0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 3, 4, 6, 7, 8, 9};
     tmp = AHBPrescTable[((RCC->CFGR & RCC_CFGR_HPRE) >> 4)];
@@ -291,6 +304,8 @@ void Clk_t::UpdateFreqValues() {
     const uint8_t APBPrescTable[8] = {0, 0, 0, 0, 1, 2, 3, 4};
     tmp = APBPrescTable[(RCC->CFGR & RCC_CFGR_PPRE) >> 8];
     APBFreqHz = AHBFreqHz >> tmp;
+    // Timer multi
+    TimerClkMulti = (tmp == 0)? 1 : 2;
 }
 
 // ==== Common use ====
@@ -304,40 +319,44 @@ void Clk_t::SetupBusDividers(AHBDiv_t AHBDiv, APBDiv_t APBDiv) {
     RCC->CFGR = tmp;
 }
 
+static inline uint8_t WaitSWS(uint32_t Desired) {
+    uint32_t StartUpCounter=0;
+    do {
+        if((RCC->CFGR & RCC_CFGR_SWS) == Desired) return 0; // Done
+        StartUpCounter++;
+    } while(StartUpCounter < CLK_STARTUP_TIMEOUT);
+    return 1; // Timeout
+}
+
 // Enables HSI, switches to HSI
 uint8_t Clk_t::SwitchTo(ClkSrc_t AClkSrc) {
+    uint32_t tmp = RCC->CFGR & ~RCC_CFGR_SW;
     switch(AClkSrc) {
         case csHSI:
             if(EnableHSI() != OK) return 1;
-            RCC->CFGR &= ~RCC_CFGR_SW;      // }
-            RCC->CFGR |=  RCC_CFGR_SW_HSI;  // } Select HSI as system clock src
-            while((RCC->CFGR & RCC_CFGR_SWS) != RCC_CFGR_SWS_HSI); // Wait till ready
+            RCC->CFGR = tmp | RCC_CFGR_SW_HSI;  // Select HSI as system clock src
+            return WaitSWS(RCC_CFGR_SWS_HSI);
             break;
 
         case csHSE:
             if(EnableHSE() != OK) return 2;
-            RCC->CFGR &= ~RCC_CFGR_SW;      // }
-            RCC->CFGR |=  RCC_CFGR_SW_HSE;  // } Select HSE as system clock src
-            while((RCC->CFGR & RCC_CFGR_SWS) != RCC_CFGR_SWS_HSE); // Wait till ready
+            RCC->CFGR = tmp | RCC_CFGR_SW_HSE;  // Select HSE as system clock src
+            return WaitSWS(RCC_CFGR_SWS_HSE);
             break;
 
         case csPLL:
             if(EnablePLL() != OK) return 3;
-            RCC->CFGR &= ~RCC_CFGR_SW;          // }
-            RCC->CFGR |=  RCC_CFGR_SW_PLL;      // } Select PLL as system clock src
-            while ((RCC->CFGR & RCC_CFGR_SWS) != RCC_CFGR_SWS_PLL); // Wait until ready
+            RCC->CFGR = tmp | RCC_CFGR_SW_PLL; // Select PLL as system clock src
+            return WaitSWS(RCC_CFGR_SWS_PLL);
             break;
 
         case csHSI48:
             if(EnableHSI48() != OK) return FAILURE;
-            else {
-                RCC->CFGR &= ~RCC_CFGR_SW;
-                RCC->CFGR |=  RCC_CFGR_SW_HSI48;
-                while ((RCC->CFGR & RCC_CFGR_SWS) != RCC_CFGR_SWS_HSI48); // Wait until ready
-            }
+            RCC->CFGR = tmp | RCC_CFGR_SW_HSI48;
+            return WaitSWS(RCC_CFGR_SWS_HSI48);
             break;
     } // switch
-    return 0;
+    return FAILURE;
 }
 
 // Disable PLL first!

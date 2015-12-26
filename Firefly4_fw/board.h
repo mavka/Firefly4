@@ -30,45 +30,32 @@
 #define UART_AF         AF1
 
 // LEDs
-#define LEDUSB_GPIO     GPIOB
-#define LEDUSB_PIN      1
-
-#define LED1_GPIO       GPIOB
-#define LED1_PIN        0
-#define LED3_GPIO       GPIOB
-#define LED3_PIN        4
-#define LED4_GPIO       GPIOB
-#define LED4_PIN        5
 
 // USB
 #define USB_GPIO		GPIOA
 #define USB_DM_PIN		11
 #define USB_DP_PIN		12
-#endif
+#define SNS_5V_GPIO     GPIOB
+#define SNS_5V_PIN      6
 
-// ADC
-#define ADC_GPIO        GPIOA
-#define ADC_CSIN_PIN    4
-#define ADC_SCK_PIN     5
-#define ADC_DOUT_PIN    6
-#define ADC_SPI_AF      AF5
+// LightSns
+#define LTSNS_GPIO      GPIOA
+#define LTSNS_PIN       1
 
 // Button
-#define BTN_GPIO        GPIOB
-#define BTN_PIN         6
+#define BTN_GPIO        GPIOA
+#define BTN_PIN         0
 
-// Amplifier
-#define GAIN_CTRL_GPIO  GPIOB
-#define GAIN_CTRL_PIN   14
+#endif
 
 #if 1 // ========================= Timer =======================================
-#define SAMPLING_TMR            TIM9
-#define SAMPLING_TMR_IRQ        TIM9_IRQn
-#define SAMPLING_TMR_IRQHandler STM32_TIM9_HANDLER
+//#define SAMPLING_TMR            TIM9
+//#define SAMPLING_TMR_IRQ        TIM9_IRQn
+//#define SAMPLING_TMR_IRQHandler STM32_TIM9_HANDLER
 #endif
 
 #if 1 // =========================== SPI =======================================
-#define SPI_ADC         SPI1
+//#define SPI_ADC         SPI1
 
 #endif
 
