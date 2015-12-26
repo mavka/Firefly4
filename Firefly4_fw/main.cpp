@@ -18,20 +18,20 @@ int main(void) {
 //    Clk.SetupPLLMulDiv(pllMul8, pllDiv3);
 //    Clk.SetupBusDividers(ahbDiv1, apbDiv1, apbDiv1);
 //    ClkResult = Clk.SwitchToPLL();
-    Clk.UpdateFreqValues();
+     Clk.UpdateFreqValues();
 
     // Init OS
     halInit();
     chSysInit();
 
     // ==== Init hardware ====
-    Uart.Init(256000, UART_GPIO, UART_TX_PIN, UART_GPIO, UART_RX_PIN);
+    SYSCFG->CFGR1 |= SYSCFG_CFGR1_USART1TX_DMA_RMP | SYSCFG_CFGR1_USART1RX_DMA_RMP;
+    Uart.Init(115200, UART_GPIO, UART_TX_PIN, UART_GPIO, UART_RX_PIN);
     Uart.Printf("\r%S %S\r", APP_NAME, APP_VERSION);
-
-//    Clk.PrintFreqs();
+    Clk.PrintFreqs();
 //    if(ClkResult != 0) Uart.Printf("XTAL failure\r");
 
-    App.InitThread();
+//    App.InitThread();
 
     // Main cycle
     App.ITask();

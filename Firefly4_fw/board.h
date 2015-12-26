@@ -27,7 +27,7 @@
 #define UART_GPIO       GPIOA
 #define UART_TX_PIN     9
 #define UART_RX_PIN     10
-#define UART_AF         AF7
+#define UART_AF         AF1
 
 // LEDs
 #define LEDUSB_GPIO     GPIOB
@@ -106,9 +106,6 @@ const uint8_t AdcChannels[] = { SNS_CHNL0, SNS_CHNL1 };
 #define UART_DMA_TX     STM32_DMA1_STREAM4
 #define UART_DMA_RX     STM32_DMA1_STREAM5
 #define UART_DMA_CHNL   0   // Dummy
-
-#define DMA_ADC         STM32_DMA1_STREAM2
-
 
 #if ADC_REQUIRED
 /* DMA request mapped on this DMA channel only if the corresponding remapping bit is cleared in the SYSCFG_CFGR1

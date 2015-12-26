@@ -171,6 +171,8 @@ OSAL_IRQ_HANDLER(SysTick_Handler) {
  *
  * @isr
  */
+extern "C" {
+
 OSAL_IRQ_HANDLER(ST_HANDLER) {
 
   OSAL_IRQ_PROLOGUE();
@@ -188,6 +190,8 @@ OSAL_IRQ_HANDLER(ST_HANDLER) {
 
   OSAL_IRQ_EPILOGUE();
 }
+
+} // extern c
 #endif /* OSAL_ST_MODE == OSAL_ST_MODE_FREERUNNING */
 
 /*===========================================================================*/

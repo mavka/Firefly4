@@ -88,7 +88,7 @@ static inline void FPutCharNow(char c) {
     while(!(UART->SR & USART_SR_TXE));
     UART_TX_REG = c;
     while(!(UART->SR & USART_SR_TXE));
-#elif defined STM32F030
+#elif defined STM32F0XX
     while(!(UART->ISR & USART_ISR_TXE));
     UART_TX_REG = c;
     while(!(UART->ISR & USART_ISR_TXE));
@@ -200,7 +200,7 @@ void Uart_t::OnAHBFreqChange() {
 #if defined STM32L1XX || defined STM32F100_MCUCONF
     if(UART == USART1) UART->BRR = Clk.APB2FreqHz / IBaudrate;
     else               UART->BRR = Clk.APB1FreqHz / IBaudrate;
-#elif defined STM32F030
+#elif defined STM32F0XX
     UART->BRR = Clk.APBFreqHz / IBaudrate;
 #elif defined STM32F2XX || defined STM32F4XX
     if(UART == USART1 or UART == USART6)
