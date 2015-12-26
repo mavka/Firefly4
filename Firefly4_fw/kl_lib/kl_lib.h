@@ -388,7 +388,7 @@ enum PinAF_t {
 };
 
 // Set/clear
-#if defined STM32L1XX || defined STM32F2XX || defined STM32F4XX || defined STM32F042x6
+#if defined STM32L1XX || defined STM32F2XX || defined STM32F4XX || defined STM32F042x6 || defined STM32F072xB
 static inline void PinSet    (GPIO_TypeDef *PGpioPort, const uint16_t APinNumber) { PGpioPort->BSRRL = (uint16_t)(1<<APinNumber); }
 static inline void PinClear  (GPIO_TypeDef *PGpioPort, const uint16_t APinNumber) { PGpioPort->BSRRH = (uint16_t)(1<<APinNumber); }
 #elif defined STM32F030 || defined STM32F10X_LD_VL
@@ -418,6 +418,9 @@ static void PinClockEnable(GPIO_TypeDef *PGpioPort) {
     else if(PGpioPort == GPIOC) RCC->AHBENR |= RCC_AHBENR_GPIOCEN;
 #ifdef GPIOD
     else if(PGpioPort == GPIOD) RCC->AHBENR |= RCC_AHBENR_GPIODEN;
+#endif
+#ifdef GPIOE
+    else if(PGpioPort == GPIOE) RCC->AHBENR |= RCC_AHBENR_GPIOEEN;
 #endif
 #ifdef GPIOF
     else if(PGpioPort == GPIOF) RCC->AHBENR |= RCC_AHBENR_GPIOFEN;

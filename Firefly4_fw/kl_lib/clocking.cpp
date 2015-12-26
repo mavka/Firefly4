@@ -268,26 +268,16 @@ void Clk_t::UpdateFreqValues() {
         case csHSE:   SysClkHz = CRYSTAL_FREQ_HZ; break;
         case csPLL: // PLL used as system clock source
             // Get different PLL dividers
-#ifdef STM32F042x6
             PreDiv = (RCC->CFGR2 & RCC_CFGR2_PREDIV) + 1;
             PllMul = ((RCC->CFGR & RCC_CFGR_PLLMUL) >> 18) + 2;
-#else
-            PreDiv = (RCC->CFGR2 & RCC_CFGR2_PREDIV1) + 1;
-            PllMul = ((RCC->CFGR & RCC_CFGR_PLLMULL) >> 18) + 2;
-#endif
             if(PllMul > 16) PllMul = 16;
             // Which src is used as pll input?
             PllSrc = RCC->CFGR & RCC_CFGR_PLLSRC;
             switch(PllSrc) {
-#ifdef STM32F042x6
                 case RCC_CFGR_PLLSRC_HSI_DIV2:   SysClkHz = HSI_FREQ_HZ / 2; break;
                 case RCC_CFGR_PLLSRC_HSI_PREDIV: SysClkHz = HSI_FREQ_HZ / PreDiv; break;
                 case RCC_CFGR_PLLSRC_HSE_PREDIV: SysClkHz = CRYSTAL_FREQ_HZ / PreDiv; break;
                 case RCC_CFGR_PLLSRC_HSI48_PREDIV: SysClkHz = HSI48_FREQ_HZ / PreDiv; break;
-#else
-                case RCC_CFGR_PLLSRC_HSI_Div2: SysClkHz = HSI_VALUE / 2; break;
-                case RCC_CFGR_PLLSRC_PREDIV1: SysClkHz = CRYSTAL_FREQ_HZ / PreDiv; break;
-#endif
                 default: break;
             }
             SysClkHz *= PllMul;
@@ -358,20 +348,12 @@ uint8_t Clk_t::SetupPLLDividers(uint8_t HsePreDiv, PllMul_t PllMul) {
     HsePreDiv--;
     if(HsePreDiv > 0x0F) HsePreDiv = 0x0F;
     uint32_t tmp = RCC->CFGR2;
-#ifdef STM32F042x6
     tmp &= ~RCC_CFGR2_PREDIV;
-#else
-    tmp &= ~RCC_CFGR2_PREDIV1;
-#endif
     tmp |= HsePreDiv;
     RCC->CFGR2 = tmp;
     // Setup PLL divider
     tmp = RCC->CFGR;
-#ifdef STM32F042x6
     tmp &= ~RCC_CFGR_PLLMUL;
-#else
-    tmp &= ~RCC_CFGR_PLLMULL;
-#endif
     tmp |= ((uint32_t)PllMul) << 18;
     RCC->CFGR = tmp;
     return 0;
@@ -401,7 +383,6 @@ void __early_init(void) {
     // Enable HSI. It is enabled by default, but who knows.
     RCC->CR |= RCC_CR_HSION;
     while(!(RCC->CR & RCC_CR_HSIRDY));
-
     // SYSCFG clock enabled here because it is a multi-functional unit
     // shared among multiple drivers using external IRQs
     rccEnableAPB2(RCC_APB2ENR_SYSCFGEN, 1);

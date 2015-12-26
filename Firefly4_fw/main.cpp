@@ -7,6 +7,8 @@
 
 #include "main.h"
 
+App_t App;
+
 int main(void) {
 
     // ==== Setup clock frequency ====
@@ -38,7 +40,7 @@ int main(void) {
 __attribute__ ((__noreturn__))
 void App_t::ITask() {
     while(true) {
-        uint32_t EvtMsk = chEvtWaitAny(ALL_EVENTS);
-
+//        uint32_t EvtMsk = chEvtWaitAny(ALL_EVENTS);
+        chThdSleepMilliseconds(999);
     } // while true
 }

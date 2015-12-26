@@ -15,9 +15,9 @@
 // MCU type as defined in the ST header.
 #define STM32F072xB
 
-//#define CRYSTAL_FREQ_HZ     12000000    // Freq of external crystal
+#define CRYSTAL_FREQ_HZ     12000000    // Freq of external crystal
 
-#define SYS_TIM_CLK         (Clk.APB1FreqHz)
+#define SYS_TIM_CLK         (Clk.APBFreqHz)
 
 // USB
 //#define USBDrv      	USBD1   // USB driver to use
@@ -74,8 +74,8 @@
 
 #if 1 // ========================== USART ======================================
 #define UART            USART1
-#define UART_TX_REG     UART->DR
-#define UART_RX_REG     UART->DR
+#define UART_TX_REG     UART->TDR
+#define UART_RX_REG     UART->RDR
 #endif
 
 #if 0 // ========================= Inner ADC ===================================
