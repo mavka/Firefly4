@@ -9,6 +9,7 @@
 #define BOARD_H_
 
 #include <inttypes.h>
+#include "CRS_defins.h"
 
 // ==== General ====
 #define BOARD_NAME          "Firefly4"
@@ -17,10 +18,7 @@
 
 #define CRYSTAL_FREQ_HZ     12000000    // Freq of external crystal
 
-#define SYS_TIM_CLK         (Clk.APBFreqHz)
-
-// USB
-//#define USBDrv      	USBD1   // USB driver to use
+#define SYS_TIM_CLK         (Clk.APBFreqHz * Clk.TimerClkMulti)
 
 #if 1 // ========================== GPIO =======================================
 // UART
@@ -85,6 +83,18 @@ const uint8_t AdcChannels[] = { SNS_CHNL0, SNS_CHNL1 };
 #if (ADC_SEQ_LEN > ADC_MAX_SEQ_LEN) || (ADC_SEQ_LEN == 0)
 #error "Wrong ADC channel count and sample count"
 #endif
+#endif
+
+#if 1 // ========================== USB ========================================
+#define USBDrv          USBD1   // USB driver to use
+
+// CRS
+#define CRS_PRESCALER   RCC_CRS_SYNC_DIV1
+#define CRS_SOURCE      RCC_CRS_SYNC_SOURCE_USB
+#define CRS_POLARITY    RCC_CRS_SYNC_POLARITY_RISING
+#define CRS_RELOAD_VAL  ((48000000 / 1000) - 1) // Ftarget / Fsync - 1
+#define CRS_ERROR_LIMIT 34
+#define HSI48_CALIBRATN 32
 #endif
 
 #if 1 // =========================== DMA =======================================

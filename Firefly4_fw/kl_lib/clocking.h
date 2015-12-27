@@ -191,6 +191,8 @@ public:
     void DisableHSI() { RCC->CR &= ~RCC_CR_HSION; }
     void DisablePLL() { RCC->CR &= ~RCC_CR_PLLON; }
     void DisableHSI48() { RCC->CR2 &= RCC_CR2_HSI48ON; }
+    void EnableCRS();
+    void SelectUSBClock_HSI48() { RCC->CFGR3 &= ~RCC_CFGR3_USBSW; }
     void SetupBusDividers(AHBDiv_t AHBDiv, APBDiv_t APBDiv);
     uint8_t SetupPLLDividers(uint8_t HsePreDiv, PllMul_t PllMul);
     void UpdateFreqValues();

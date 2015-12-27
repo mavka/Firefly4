@@ -7,13 +7,13 @@
 
 #include "main.h"
 #include "SimpleSensors.h"
+#include "usb_cdc.h"
+#include "serial_usb.h"
 
 App_t App;
 
 int main(void) {
-
     // ==== Setup clock frequency ====
-//    uint8_t ClkResult = 1;
     Clk.EnablePrefetch();
     Clk.SetupBusDividers(ahbDiv2, apbDiv1);
     Clk.UpdateFreqValues();
@@ -27,11 +27,11 @@ int main(void) {
     Uart.Init(115200, UART_GPIO, UART_TX_PIN, UART_GPIO, UART_RX_PIN);
     Uart.Printf("\r%S %S\r", APP_NAME, APP_VERSION);
     Clk.PrintFreqs();
-//    if(ClkResult != 0) Uart.Printf("XTAL failure\r");
-    chThdSleepMilliseconds(450);
+    chThdSleepMilliseconds(45);
 
     App.InitThread();
     PinSensors.Init();
+    UsbCDC.Init();
 
     // Main cycle
     App.ITask();
@@ -41,6 +41,7 @@ __attribute__ ((__noreturn__))
 void App_t::ITask() {
     while(true) {
         uint32_t EvtMsk = chEvtWaitAny(ALL_EVENTS);
+
         if(EvtMsk & EVTMSK_USB_CONNECTED) {
             Uart.Printf("5v is here\r");
             chThdSleepMilliseconds(450);
@@ -50,8 +51,17 @@ void App_t::ITask() {
             Clk.UpdateFreqValues();
             Uart.OnAHBFreqChange();
             chSysUnlock();
-            if(r != OK) Uart.Printf("Hsi Fail\r");
             Clk.PrintFreqs();
+            if(r == OK) {
+                Clk.SelectUSBClock_HSI48();
+                Clk.EnableCRS();
+                UsbCDC.Connect();
+            }
+            else Uart.Printf("Hsi Fail\r");
+        }
+
+        if(EvtMsk & EVTMSK_USB_READY) {
+            Uart.Printf("\rUsbReady");
         }
     } // while true
 }

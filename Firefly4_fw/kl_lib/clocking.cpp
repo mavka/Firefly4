@@ -306,6 +306,8 @@ void Clk_t::UpdateFreqValues() {
     APBFreqHz = AHBFreqHz >> tmp;
     // Timer multi
     TimerClkMulti = (tmp == 0)? 1 : 2;
+    // ==== Update prescaler in System Timer ====
+    STM32_ST_TIM->PSC = (SYS_TIM_CLK / OSAL_ST_FREQUENCY) - 1;
 }
 
 // ==== Common use ====
@@ -391,6 +393,27 @@ void Clk_t::PrintFreqs() {
     Uart.Printf(
             "AHBFreq=%uMHz; APBFreq=%uMHz\r",
             Clk.AHBFreqHz/1000000, Clk.APBFreqHz/1000000);
+}
+
+void Clk_t::EnableCRS() {
+    RCC->APB1ENR |= RCC_APB1ENR_CRSEN;      // Enable CRS clocking
+    RCC->APB1RSTR |= RCC_APB1RSTR_CRSRST;   // }
+    RCC->APB1RSTR &= ~RCC_APB1RSTR_CRSRST;  // } Reset CRS
+    // Configure Synchronization input
+    // Clear SYNCDIV[2:0], SYNCSRC[1:0] & SYNCSPOL bits
+    CRS->CFGR &= ~(CRS_CFGR_SYNCDIV | CRS_CFGR_SYNCSRC | CRS_CFGR_SYNCPOL);
+    // Configure CRS prescaler, source & polarity
+    CRS->CFGR |= (CRS_PRESCALER | CRS_SOURCE | CRS_POLARITY);
+    // Configure Frequency Error Measurement
+    CRS->CFGR &= ~(CRS_CFGR_RELOAD | CRS_CFGR_FELIM);
+    CRS->CFGR |= (CRS_RELOAD_VAL | (CRS_ERROR_LIMIT << 16));
+    // Adjust HSI48 oscillator smooth trimming
+    CRS->CR &= ~CRS_CR_TRIM;
+    CRS->CR |= (HSI48_CALIBRATN << 8);
+    // Enable auto trimming
+    CRS->CR |= CRS_CR_AUTOTRIMEN;
+    // Enable Frequency error counter
+    CRS->CR |= CRS_CR_CEN;
 }
 
 /*
