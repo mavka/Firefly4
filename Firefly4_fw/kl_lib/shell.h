@@ -56,6 +56,17 @@ public:
         }
         else return r;
     }
+
+    uint8_t GetArray(int32_t *Ptr, int32_t Len) {
+        int32_t dw32 = 0;
+        for(int32_t i=0; i<Len; i++) {
+            uint8_t r = GetNextNumber(&dw32);
+            if(r == OK) *Ptr++ = dw32;
+            else return r;
+        }
+        return OK;
+    }
+
     bool NameIs(const char *SCmd) { return (strcasecmp(Name, SCmd) == 0); }
     Cmd_t() {
         Cnt = 0;

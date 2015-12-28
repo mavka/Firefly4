@@ -20,6 +20,8 @@
 
 #define SYS_TIM_CLK         (Clk.APBFreqHz * Clk.TimerClkMulti)
 
+#define LED_CNT         3   // Number of RGB LEDs
+
 #if 1 // ========================== GPIO =======================================
 // UART
 #define UART_GPIO       GPIOA
@@ -28,6 +30,8 @@
 #define UART_AF         AF1
 
 // LEDs
+#define LEDWS_GPIO      GPIOB
+#define LEDWS_PIN       1
 
 // USB
 #define USB_GPIO		GPIOA
@@ -47,8 +51,9 @@
 #endif
 
 #if 1 // ========================= Timer =======================================
-//#define SAMPLING_TMR            TIM9
-//#define SAMPLING_TMR_IRQ        TIM9_IRQn
+#define LEDWS_TMR       TIM3
+#define LEDWS_TMR_CH    4
+//#define LEDWS_TMR_IRQ        TIM9_IRQn
 //#define SAMPLING_TMR_IRQHandler STM32_TIM9_HANDLER
 #endif
 
@@ -103,6 +108,8 @@ const uint8_t AdcChannels[] = { SNS_CHNL0, SNS_CHNL1 };
 #define UART_DMA_TX     STM32_DMA1_STREAM4
 #define UART_DMA_RX     STM32_DMA1_STREAM5
 #define UART_DMA_CHNL   0   // Dummy
+
+#define LEDWS_DMA       STM32_DMA1_STREAM3
 
 #if ADC_REQUIRED
 /* DMA request mapped on this DMA channel only if the corresponding remapping bit is cleared in the SYSCFG_CFGR1

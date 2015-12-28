@@ -339,6 +339,7 @@ public:
     }
     // DMA, Irq, Evt
     void EnableDmaOnTrigger() { ITmr->DIER |= TIM_DIER_TDE; }
+    void EnableDmaOnUpdate()  { ITmr->DIER |= TIM_DIER_UDE; }
     void GenerateUpdateEvt()  { ITmr->EGR = TIM_EGR_UG; }
     void EnableIrqOnUpdate()  { ITmr->DIER |= TIM_DIER_UIE; }
     void EnableIrq(uint32_t IrqChnl, uint32_t IrqPriority) { nvicEnableVector(IrqChnl, IrqPriority); }
@@ -606,9 +607,9 @@ public:
 };
 
 // ==== PWM output ====
-// Example: PinOutputPWM_t<LED_TOP_VALUE, LED_INVERTED_PWM> IChnl({GPIOB, 15, TIM11, 1});
+// Example: PinOutputPWM_t<LED_TOP_VALUE, LED_INVERTED_PWM, omPushPull> IChnl({GPIOB, 15, TIM11, 1});
 template <uint32_t TopValue, Inverted_t Inverted, PinOutMode_t OutputType>
-class PinOutputPWM_t : private Timer_t {
+class PinOutputPWM_t : public Timer_t {
 private:
     GPIO_TypeDef *PGpio;
     uint16_t Pin;
