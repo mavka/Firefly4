@@ -61,10 +61,30 @@ void App_t::ITask() {
         }
 
         if(EvtMsk & EVTMSK_USB_READY) {
-            Uart.Printf("\rUsbReady");
+            Uart.Printf("UsbReady\r");
+        }
+
+        if(EvtMsk & EVTMSK_USB_NEW_CMD) {
+            OnCmd((Shell_t*)&UsbCDC);
+            UsbCDC.SignalCmdProcessed();
         }
     } // while true
 }
+
+#if 1 // ======================= Command processing ============================
+void App_t::OnCmd(Shell_t *PShell) {
+    Cmd_t *PCmd = &PShell->Cmd;
+    __attribute__((unused)) int32_t dw32 = 0;  // May be unused in some configurations
+    PShell->Printf(">%S\r", PCmd->Name);
+//    Uart.Printf("%S\r", PCmd->Name);
+    // Handle command
+    if(PCmd->NameIs("Ping")) {
+        PShell->Ack(OK);
+    }
+
+    else PShell->Ack(CMD_UNKNOWN);
+}
+#endif
 
 // 5v Sns
 void Process5VSns(PinSnsState_t *PState, uint32_t Len) {

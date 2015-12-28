@@ -11,18 +11,16 @@
 #include "hal.h"
 #include "serial_usb.h"
 #include "stdarg.h"
+#include "shell.h"
 
-
-class UsbCDC_t {
+class UsbCDC_t : public Shell_t {
 private:
-    void IPrintf(const char *format, va_list args);
 public:
     void Init();
     void Connect();
     void Disconnect();
     bool IsActive() { return (SDU1.config->usbp->state == USB_ACTIVE); }
     void Printf(const char *S, ...);
-    void PrintfI(const char *S, ...);
     // Inner use
     SerialUSBDriver SDU1;
 };

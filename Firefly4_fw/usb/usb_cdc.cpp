@@ -96,6 +96,25 @@ const SerialUSBConfig SerUsbCfg = {
 #endif
 
 #if 1 // ========================== RX Thread ==================================
+static THD_WORKING_AREA(waThdCDCRX, 128);
+static THD_FUNCTION(ThdCDCRX, arg) {
+    chRegSetThreadName("CDCRX");
+    while (true) {
+        if(UsbCDC.IsActive()) {
+            msg_t m = UsbCDC.SDU1.vmt->get(&UsbCDC.SDU1);
+            if(m > 0) {
+//                UsbCDC.SDU1.vmt->put(&UsbCDC.SDU1, (uint8_t)m);   // repeat what was sent
+                if(UsbCDC.Cmd.PutChar((char)m) == pdrNewCmd) {
+                    chSysLock();
+                    App.SignalEvtI(EVTMSK_USB_NEW_CMD);
+                    chSchGoSleepS(CH_STATE_SUSPENDED); // Wait until cmd processed
+                    chSysUnlock();  // Will be here when application signals that cmd processed
+                }
+            } // if >0
+        } // if active
+        else chThdSleepMilliseconds(540);
+    } // while true
+}
 
 #endif
 
@@ -106,6 +125,8 @@ void UsbCDC_t::Init() {
     usbInit();
     sduObjectInit(&SDU1);
     sduStart(&SDU1, &SerUsbCfg);
+    // RX thread
+    IPThd = chThdCreateStatic(waThdCDCRX, sizeof(waThdCDCRX), NORMALPRIO, ThdCDCRX, NULL);
 }
 
 void UsbCDC_t::Connect() {
@@ -120,21 +141,8 @@ static inline void uFPutChar(char c) {
 }
 
 void UsbCDC_t::Printf(const char *format, ...) {
-    chSysLock();
     va_list args;
     va_start(args, format);
-    IPrintf(format, args);
-    va_end(args);
-    chSysUnlock();
-}
-
-void UsbCDC_t::PrintfI(const char *format, ...) {
-    va_list args;
-    va_start(args, format);
-    IPrintf(format, args);
-    va_end(args);
-}
-
-void UsbCDC_t::IPrintf(const char *format, va_list args) {
     kl_vsprintf(uFPutChar, 0xFFFF, format, args);
+    va_end(args);
 }

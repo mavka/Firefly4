@@ -235,7 +235,7 @@ void _dbg_check_leave_isr(void) {
 void chDbgCheckClassI(void) {
 
   if ((ch.dbg.isr_cnt < (cnt_t)0) || (ch.dbg.lock_cnt <= (cnt_t)0)) {
-    chSysHalt("SV#10", "");
+    chSysHalt("SV#10", __func__);
   }
 }
 
