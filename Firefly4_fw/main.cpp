@@ -36,9 +36,6 @@ int main(void) {
     UsbCDC.Init();
     LedWs.Init();
 
-//    LedWs.SetCommonColor(clGreen);
-//    LedWs.SetCommonColorSmoothly(clBlack, 810);
-
     // Main cycle
     App.ITask();
 }
@@ -60,9 +57,9 @@ void App_t::ITask() {
             chSysUnlock();
             Clk.PrintFreqs();
             if(r == OK) {
-//                Clk.SelectUSBClock_HSI48();
-//                Clk.EnableCRS();
-//                UsbCDC.Connect();
+                Clk.SelectUSBClock_HSI48();
+                Clk.EnableCRS();
+                UsbCDC.Connect();
             }
             else Uart.Printf("Hsi Fail\r");
         }
@@ -82,6 +79,7 @@ void App_t::ITask() {
 
         if(EvtMsk & EVTMSK_LEDS_DONE) {
             Uart.Printf("Done\r\n");
+            if(UsbCDC.IsActive()) UsbCDC.Printf("Done\r\n");
         }
     } // while true
 }
