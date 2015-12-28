@@ -13,45 +13,6 @@
 
 App_t App;
 
-class LedParams_t {
-public:
-    union {
-        struct {
-            int32_t Indx;
-            int32_t R, G, B;
-            int32_t Smooth;
-        };
-        int32_t Arr[5];
-    };
-    uint8_t Check(Shell_t *PShell) {
-        uint8_t Rslt = OK;
-        if(Indx < 1 or Indx > 3) {
-            PShell->Printf("Bad indx: %d\r\n", Indx);
-            Rslt = FAILURE;
-        }
-        if(R < 0 or R > 255) {
-            PShell->Printf("Bad R: %d\r\n", R);
-            Rslt = FAILURE;
-        }
-        if(G < 0 or G > 255) {
-            PShell->Printf("Bad G: %d\r\n", G);
-            Rslt = FAILURE;
-        }
-        if(B < 0 or B > 255) {
-            PShell->Printf("Bad B: %d\r\n", B);
-            Rslt = FAILURE;
-        }
-        if(Smooth < 0) {
-            PShell->Printf("Bad Smooth: %d\r\n", Smooth);
-            Rslt = FAILURE;
-        }
-        return Rslt;
-    }
-    void Print() {
-        Uart.Printf("%u  %u %u %u   %u\r", Indx, R, G, B, Smooth);
-    }
-};
-
 LedParams_t LedParams[LED_CNT];
 
 int main(void) {
@@ -69,13 +30,14 @@ int main(void) {
     Uart.Init(115200, UART_GPIO, UART_TX_PIN, UART_GPIO, UART_RX_PIN);
     Uart.Printf("\r%S %S\r", APP_NAME, APP_VERSION);
     Clk.PrintFreqs();
-    chThdSleepMilliseconds(45);
 
     App.InitThread();
     PinSensors.Init();
     UsbCDC.Init();
     LedWs.Init();
-    LedWs.SetCommonColor(clGreen);
+
+//    LedWs.SetCommonColor(clGreen);
+//    LedWs.SetCommonColorSmoothly(clBlack, 810);
 
     // Main cycle
     App.ITask();
@@ -86,23 +48,24 @@ void App_t::ITask() {
     while(true) {
         uint32_t EvtMsk = chEvtWaitAny(ALL_EVENTS);
 
-//        if(EvtMsk & EVTMSK_USB_CONNECTED) {
-//            Uart.Printf("5v is here\r");
-//            chThdSleepMilliseconds(450);
-//            // Enable HSI48
-//            chSysLock();
-//            uint8_t r = Clk.SwitchTo(csHSI48);
-//            Clk.UpdateFreqValues();
-//            Uart.OnAHBFreqChange();
-//            chSysUnlock();
-//            Clk.PrintFreqs();
-//            if(r == OK) {
+        if(EvtMsk & EVTMSK_USB_CONNECTED) {
+            Uart.Printf("5v is here\r");
+            chThdSleepMilliseconds(450);
+            // Enable HSI48
+            chSysLock();
+            uint8_t r = Clk.SwitchTo(csHSI48);
+            Clk.UpdateFreqValues();
+            Uart.OnAHBFreqChange();
+            LedWs.OnAHBFreqChange();
+            chSysUnlock();
+            Clk.PrintFreqs();
+            if(r == OK) {
 //                Clk.SelectUSBClock_HSI48();
 //                Clk.EnableCRS();
 //                UsbCDC.Connect();
-//            }
-//            else Uart.Printf("Hsi Fail\r");
-//        }
+            }
+            else Uart.Printf("Hsi Fail\r");
+        }
 
         if(EvtMsk & EVTMSK_USB_READY) {
             Uart.Printf("UsbReady\r");
@@ -116,6 +79,10 @@ void App_t::ITask() {
             OnCmd((Shell_t*)&Uart);
             Uart.SignalCmdProcessed();
         }
+
+        if(EvtMsk & EVTMSK_LEDS_DONE) {
+            Uart.Printf("Done\r\n");
+        }
     } // while true
 }
 
@@ -123,7 +90,7 @@ void App_t::ITask() {
 void App_t::OnCmd(Shell_t *PShell) {
     Cmd_t *PCmd = &PShell->Cmd;
     __attribute__((unused)) int32_t dw32 = 0;  // May be unused in some configurations
-    PShell->Printf(">%S\r", PCmd->Name);
+//    PShell->Printf(">%S\r", PCmd->Name);
 //    Uart.Printf("%S\r", PCmd->Name);
     // Handle command
     if(PCmd->NameIs("Ping")) {
@@ -135,14 +102,20 @@ void App_t::OnCmd(Shell_t *PShell) {
         for(uint8_t i = 0; i < 3; i++) {
             // Get array of params
             if(PCmd->GetArray(LedParams[i].Arr, 5) == OK) {
-                LedParams[i].Print();
+//                LedParams[i].Print();
                 if(LedParams[i].Check(PShell) == OK) {
                     Rslt = OK;
+                    uint8_t indx = LedParams[i].Indx - 1;
+                    chSysLock();
+                    LedWs.DesiredClr[indx].Set(LedParams[i].R, LedParams[i].G, LedParams[i].B);
+                    LedWs.SmoothValue[indx] = LedParams[i].Smooth;
+                    chSysUnlock();
                 }
                 else break;
             }
             else break;
         } // for
+        if(Rslt == OK) LedWs.StartProcess();
         PShell->Ack(Rslt);
     }
 

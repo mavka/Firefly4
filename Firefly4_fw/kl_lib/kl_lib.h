@@ -299,6 +299,7 @@ enum ExtTrigPsc_t {etpOff=0x0000, etpDiv2=0x1000, etpDiv4=0x2000, etpDiv8=0x3000
 #endif
 #define TMR_ENABLE(PTimer)          PTimer->CR1 |=  TIM_CR1_CEN;
 #define TMR_DISABLE(PTimer)         PTimer->CR1 &= ~TIM_CR1_CEN;
+#define TMR_GENERATE_UPD(PTimer)    PTimer->EGR = TIM_EGR_UG;
 
 class Timer_t {
 protected:
@@ -312,10 +313,10 @@ public:
     void Deinit();
     void Enable()  { TMR_ENABLE(ITmr); }
     void Disable() { TMR_DISABLE(ITmr); }
+    void SetClkFreqHz(uint32_t FreqHz);
     void SetUpdateFrequency(uint32_t FreqHz);
     void SetTopValue(uint32_t Value) { ITmr->ARR = Value; }
     uint32_t GetTopValue() { return ITmr->ARR; }
-    void SetupPrescaler(uint32_t PrescaledFreqHz) { ITmr->PSC = (*PClk / PrescaledFreqHz) - 1; }
     void SetCounter(uint32_t Value) { ITmr->CNT = Value; }
     uint32_t GetCounter() { return ITmr->CNT; }
     // Master/Slave
@@ -621,7 +622,6 @@ public:
         InitPwm(PGpio, Pin, TmrChnl, TopValue, Inverted, OutputType);
         Enable();
     }
-    void SetFrequencyHz(uint32_t FreqHz) { Timer_t::SetUpdateFrequency(FreqHz); }
     PinOutputPWM_t(GPIO_TypeDef *APGpio, uint16_t APin, TIM_TypeDef *APTimer, uint32_t ATmrChnl) :
         PGpio(APGpio), Pin(APin), TmrChnl(ATmrChnl) { ITmr = APTimer; }
 };

@@ -307,7 +307,13 @@ void Clk_t::UpdateFreqValues() {
     // Timer multi
     TimerClkMulti = (tmp == 0)? 1 : 2;
     // ==== Update prescaler in System Timer ====
-    STM32_ST_TIM->PSC = (SYS_TIM_CLK / OSAL_ST_FREQUENCY) - 1;
+    uint32_t Psc = (SYS_TIM_CLK / OSAL_ST_FREQUENCY) - 1;
+    TMR_DISABLE(STM32_ST_TIM);          // Stop counter
+    uint32_t Cnt = STM32_ST_TIM->CNT;   // Save current time
+    STM32_ST_TIM->PSC = Psc;
+    TMR_GENERATE_UPD(STM32_ST_TIM);
+    STM32_ST_TIM->CNT = Cnt;            // Restore time
+    TMR_ENABLE(STM32_ST_TIM);
 }
 
 // ==== Common use ====

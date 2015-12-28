@@ -125,6 +125,15 @@ void Timer_t::InitPwm(GPIO_TypeDef *GPIO, uint16_t N, uint8_t Chnl, uint32_t ATo
     }
 }
 
+void Timer_t::SetClkFreqHz(uint32_t FreqHz) {
+    uint32_t Prescaler = (*PClk * Clk.TimerClkMulti) / FreqHz;
+    if(Prescaler > 0) Prescaler--;
+    TMR_DISABLE(ITmr);
+    ITmr->PSC = Prescaler;
+    TMR_GENERATE_UPD(ITmr);
+    TMR_ENABLE(ITmr);
+}
+
 void Timer_t::SetUpdateFrequency(uint32_t FreqHz) {
 #if defined STM32F2XX || defined STM32F4XX
     if(ANY_OF_5(ITmr, TIM1, TIM8, TIM9, TIM10, TIM11))  // APB2 is clock src
