@@ -7,8 +7,8 @@
 
 #include "main.h"
 #include "SimpleSensors.h"
-#include "usb_cdc.h"
 #include "color.h"
+#include "usb_keybrd.h"
 
 App_t App;
 
@@ -16,6 +16,7 @@ int main(void) {
     // ==== Setup clock frequency ====
     Clk.EnablePrefetch();
     Clk.SetupBusDividers(ahbDiv2, apbDiv1);
+    uint8_t r = Clk.SwitchTo(csHSI48);
     Clk.UpdateFreqValues();
 
     // Init OS
@@ -27,20 +28,14 @@ int main(void) {
     Uart.Init(115200, UART_GPIO, UART_TX_PIN, UART_GPIO, UART_RX_PIN);
     Uart.Printf("\r%S %S\r", APP_NAME, APP_VERSION);
     Clk.PrintFreqs();
-
     App.InitThread();
 
-//    App.SignalEvt(EVTMSK_USB_CONNECTED);
-    UsbCDC.Init();
+    UsbKBrd.Init();
 
-    uint8_t r = Clk.SwitchTo(csHSI48);
-    Clk.UpdateFreqValues();
-    Uart.OnAHBFreqChange();
-    Clk.PrintFreqs();
     if(r == OK) {
         Clk.SelectUSBClock_HSI48();
         Clk.EnableCRS();
-        UsbCDC.Connect();
+        UsbKBrd.Connect();
     }
     else Uart.Printf("Hsi Fail\r");
 
@@ -57,10 +52,6 @@ void App_t::ITask() {
             Uart.Printf("UsbReady\r");
         }
 
-        if(EvtMsk & EVTMSK_USB_NEW_CMD) {
-            OnCmd((Shell_t*)&UsbCDC);
-            UsbCDC.SignalCmdProcessed();
-        }
         if(EvtMsk & EVTMSK_UART_NEW_CMD) {
             OnCmd((Shell_t*)&Uart);
             Uart.SignalCmdProcessed();
@@ -77,6 +68,7 @@ void App_t::OnCmd(Shell_t *PShell) {
     // Handle command
     if(PCmd->NameIs("Ping")) {
         PShell->Ack(OK);
+        UsbKBrd.PressAndRelease(HID_KEYBOARD_SC_A);
     }
 
     else PShell->Ack(CMD_UNKNOWN);

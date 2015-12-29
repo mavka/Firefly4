@@ -15,7 +15,7 @@
 
 UsbKBrd_t UsbKBrd;
 
-bool OnSetupPkt(USBDriver *usbp);
+static bool OnSetupPkt(USBDriver *usbp);
 static void OnUsbEvent(USBDriver *usbp, usbevent_t event);
 
 static USBInEndpointState ep1Instate;
@@ -23,7 +23,7 @@ const USBDescriptor *pDesc;
 
 #if 1 // ========================== Endpoints ==================================
 // ==== EP1 ====
-void EpInCallback(USBDriver *usbp, usbep_t ep) {
+static void EpInCallback(USBDriver *usbp, usbep_t ep) {
 	chSysLockFromISR();
 	UsbKBrd.ISendInReportI();
 	chSysUnlockFromISR();
@@ -47,7 +47,7 @@ static const USBEndpointConfig ep1config = {
 
 #if 1 // ======================== Events & Config ==============================
 // ==== USB driver configuration ====
-const USBConfig UsbCfg = {
+static const USBConfig UsbCfg = {
 	OnUsbEvent,         // This callback is invoked when an USB driver event is registered
     GetDescriptor,      // Device GET_DESCRIPTOR request callback
     OnSetupPkt,         // This hook allows to be notified of standard requests or to handle non standard requests
@@ -55,7 +55,7 @@ const USBConfig UsbCfg = {
 };
 
 void OnUsbEvent(USBDriver *usbp, usbevent_t event) {
-	Uart.PrintfI("USB evt=%X\r", event);
+//	Uart.PrintfI("USB evt=%X\r", event);
     switch (event) {
         case USB_EVENT_RESET:
             return;
@@ -104,10 +104,11 @@ bool OnSetupPkt(USBDriver *usbp) {
     				return true;
     			}
     			break;
-    		case HID_REQ_SetReport:
-//    			Uart.PrintfI("\rSetRep Len = %u", Setup->wLength);
-    			return true;
-    			break;
+//    		case HID_REQ_SetReport:
+////    			Uart.PrintfI("\rSetRep Len = %u", Setup->wLength);
+//    		    usbSetupTransfer(usbp, NULL, 0, NULL);
+//    			return true;
+//    			break;
     		// This request is required only for boot devices
     		case HID_REQ_GetProtocol:
     			// The Get_Protocol request reads which protocol is currently active (either the boot
@@ -154,6 +155,12 @@ void UsbKBrd_t::Init() {
     usbInit();
 }
 
+void UsbKBrd_t::Connect() {
+    usbDisconnectBus();
+    chThdSleepMilliseconds(1500);
+    usbStart(&USBD1, &UsbCfg);
+    usbConnectBus();
+}
 
 void UsbKBrd_t::ISendInReportI() {
 	if(usbGetDriverStateI(&USBDrv) != USB_ACTIVE) return;

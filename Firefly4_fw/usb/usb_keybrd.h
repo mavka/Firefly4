@@ -19,6 +19,7 @@ class UsbKBrd_t : public UsbCommon_t {
 private:
 public:
     void Init();
+    void Connect();
     // Data
     void PressKey(uint8_t KeyCode);
     void DepressKey(uint8_t KeyCode);
