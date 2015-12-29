@@ -104,11 +104,11 @@ bool OnSetupPkt(USBDriver *usbp) {
     				return true;
     			}
     			break;
-//    		case HID_REQ_SetReport:
-////    			Uart.PrintfI("\rSetRep Len = %u", Setup->wLength);
-//    		    usbSetupTransfer(usbp, NULL, 0, NULL);
-//    			return true;
-//    			break;
+    		case HID_REQ_SetReport:
+    			Uart.PrintfI("\rSetRep Len = %u", Setup->wLength);
+    		    usbSetupTransfer(usbp, NULL, 0, NULL);
+    			return true;
+    			break;
     		// This request is required only for boot devices
     		case HID_REQ_GetProtocol:
     			// The Get_Protocol request reads which protocol is currently active (either the boot
