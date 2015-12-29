@@ -14,7 +14,7 @@
 
 #include "hal.h"
 #include <kl_lib.h>
-#include <PinSnsSettings.h>
+//#include <PinSnsSettings.h>
 
 #if SIMPLESENSORS_ENABLED
 class SimpleSensors_t {

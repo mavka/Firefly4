@@ -14,7 +14,7 @@
 #include "evt_mask.h"
 #include "board.h"
 
-#define APP_NAME            "Firefly4"
+#define APP_NAME            "GestRec_f4"
 #define APP_VERSION         __DATE__ " " __TIME__
 
 class App_t {
