@@ -124,6 +124,7 @@ void Uart_t::IRxTask() {
 #else
         int32_t Sz = UART_RXBUF_SZ - UART_DMA_RX->channel->CNDTR;   // Number of bytes copied to buffer since restart
 #endif
+        Printf("sz %d\r", Sz);
         if(Sz != SzOld) {
             int32_t ByteCnt = Sz - SzOld;
             if(ByteCnt < 0) ByteCnt += UART_RXBUF_SZ;   // Handle buffer circulation

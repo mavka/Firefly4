@@ -147,6 +147,14 @@ bool OnSetupPkt(USBDriver *usbp) {
     return false;
 }
 
+void UsbKBrd_t::Init() {
+    PinSetupAnalog(GPIOA, 11);
+    PinSetupAnalog(GPIOA, 12);
+    // Objects
+    usbInit();
+}
+
+
 void UsbKBrd_t::ISendInReportI() {
 	if(usbGetDriverStateI(&USBDrv) != USB_ACTIVE) return;
 	if(usbGetTransmitStatusI(&USBDrv, EP_DATA_IN_ID)) return;	// Endpoint busy

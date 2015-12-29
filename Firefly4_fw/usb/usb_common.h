@@ -29,12 +29,7 @@ extern const USBConfig UsbCfg;
 
 class UsbCommon_t {
 public:
-    void Init() {
-#ifdef STM32F20XX
-        PinSetupAlterFunc(USB_GPIO, USB_DM_PIN, omOpenDrain, pudNone, AF10);
-        PinSetupAlterFunc(USB_GPIO, USB_DP_PIN, omOpenDrain, pudNone, AF10);
-#endif
-    }
+    virtual void Init();
     void Connect() {
         usbDisconnectBus(&USBDrv);
         chThdSleepMilliseconds(1530);
