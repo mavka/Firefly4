@@ -7,7 +7,7 @@
 
 #include "main.h"
 #include "SimpleSensors.h"
-#include "usb_keybrd.h"
+#include "usb_cdc.h"
 #include "color.h"
 
 App_t App;
@@ -23,26 +23,26 @@ int main(void) {
     chSysInit();
 
     // ==== Init hardware ====
-    // Enable HSI48
-    uint8_t r = Clk.SwitchTo(csHSI48);
-    chThdSleepMilliseconds(450);
-    Clk.UpdateFreqValues();
-    if(r == OK) {
-        Clk.SelectUSBClock_HSI48();
-        Clk.EnableCRS();
-    }
-
-    // Remap USART DMA
     SYSCFG->CFGR1 |= SYSCFG_CFGR1_USART1TX_DMA_RMP | SYSCFG_CFGR1_USART1RX_DMA_RMP;
     Uart.Init(115200, UART_GPIO, UART_TX_PIN, UART_GPIO, UART_RX_PIN);
     Uart.Printf("\r%S %S\r", APP_NAME, APP_VERSION);
-    if(r != OK) Uart.Printf("Hsi Fail\r");
     Clk.PrintFreqs();
 
     App.InitThread();
 
-    UsbKBrd.Init();
-    UsbKBrd.Connect();
+//    App.SignalEvt(EVTMSK_USB_CONNECTED);
+    UsbCDC.Init();
+
+    uint8_t r = Clk.SwitchTo(csHSI48);
+    Clk.UpdateFreqValues();
+    Uart.OnAHBFreqChange();
+    Clk.PrintFreqs();
+    if(r == OK) {
+        Clk.SelectUSBClock_HSI48();
+        Clk.EnableCRS();
+        UsbCDC.Connect();
+    }
+    else Uart.Printf("Hsi Fail\r");
 
     // Main cycle
     App.ITask();
@@ -57,6 +57,10 @@ void App_t::ITask() {
             Uart.Printf("UsbReady\r");
         }
 
+        if(EvtMsk & EVTMSK_USB_NEW_CMD) {
+            OnCmd((Shell_t*)&UsbCDC);
+            UsbCDC.SignalCmdProcessed();
+        }
         if(EvtMsk & EVTMSK_UART_NEW_CMD) {
             OnCmd((Shell_t*)&Uart);
             Uart.SignalCmdProcessed();
