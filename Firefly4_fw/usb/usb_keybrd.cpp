@@ -90,6 +90,8 @@ void OnUsbEvent(USBDriver *usbp, usbevent_t event) {
 #define REQTYPE_CLASS              (1 << 5)
 #define REQREC_INTERFACE           (1 << 0)
 
+static uint8_t BufDummy[8];
+
 bool OnSetupPkt(USBDriver *usbp) {
     SetupPkt_t *Setup = (SetupPkt_t*)usbp->setup;
 //    Uart.PrintfI("\rSetup: %A", usbp->setup, 8, ' ');
@@ -105,9 +107,14 @@ bool OnSetupPkt(USBDriver *usbp) {
     			}
     			break;
     		case HID_REQ_SetReport:
-    			Uart.PrintfI("\rSetRep Len = %u", Setup->wLength);
-    		    usbSetupTransfer(usbp, NULL, 0, NULL);
-    			return true;
+//    			Uart.PrintfI("\rSetRep Len = %u", Setup->wLength);
+    			if(Setup->wLength < 8) {
+    			    usbPrepareReceive(usbp, 0, BufDummy, Setup->wLength);
+    			    chSysLockFromISR();
+    			    usbStartReceiveI(usbp, 0);
+    			    chSysUnlockFromISR();
+    			    return true;
+    			}
     			break;
     		// This request is required only for boot devices
     		case HID_REQ_GetProtocol:
