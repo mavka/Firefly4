@@ -12,7 +12,7 @@
 
 Clk_t Clk;
 
-#define CLK_STARTUP_TIMEOUT     20007
+#define CLK_STARTUP_TIMEOUT     63000
 
 #if defined STM32L1XX
 // ==== Inner use ====

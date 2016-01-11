@@ -30,8 +30,8 @@
 #define UART_AF         AF1
 
 // LEDs
-#define LEDWS_GPIO      GPIOB
-#define LEDWS_PIN       1
+//#define LEDWS_GPIO      GPIOB
+//#define LEDWS_PIN       1
 
 // USB
 #define USB_GPIO		GPIOA
@@ -48,11 +48,15 @@
 #define BTN_GPIO        GPIOA
 #define BTN_PIN         0
 
+#define SNS_GPIO        GPIOA
+#define SNS_PIN0        3
+#define SNS_PIN1        4
+
 #endif
 
 #if 1 // ========================= Timer =======================================
-#define LEDWS_TMR       TIM3
-#define LEDWS_TMR_CH    4
+//#define LEDWS_TMR       TIM3
+//#define LEDWS_TMR_CH    4
 //#define LEDWS_TMR_IRQ        TIM9_IRQn
 //#define SAMPLING_TMR_IRQHandler STM32_TIM9_HANDLER
 #endif
@@ -68,26 +72,32 @@
 #define UART_RX_REG     UART->RDR
 #endif
 
-#if 0 // ========================= Inner ADC ===================================
+#if 1 // ========================= Inner ADC ===================================
 #define ADC_REQUIRED        TRUE
-// Clock divider: clock is generated from the APB2
-#define ADC_CLK_DIVIDER		adcDiv2	// 32MHz / 2 = 16MHz
 
-// ADC channels: LED3, LED6
-#define SNS_CHNL0 	        10
-#define SNS_CHNL1 	        14
+// ADC channels
+#define SNS_CHNL0 	        3
+#define SNS_CHNL1 	        4
 
-#define ADC_VREFINT_CHNL    17  // All 4xx devices. Do not change.
-const uint8_t AdcChannels[] = { SNS_CHNL0, SNS_CHNL1 };
+// Inner ADC channels.  Do not change.
+#define ADC_TEMPERATUR_CHNL 16
+#define ADC_VREFINT_CHNL    17
+#define ADC_VBAT_CHNL       18
+
+static const uint8_t AdcChannels[] = { SNS_CHNL0, SNS_CHNL1 };
 #define ADC_CHANNEL_CNT     2   // Do not use countof(AdcChannels) as preprocessor does not know what is countof => cannot check
 #define ADC_SAMPLE_TIME     ast55d5Cycles
 #define ADC_SAMPLE_CNT      8   // How many times to measure every channel
-
-#define ADC_MAX_SEQ_LEN     16  // 1...16	// Const, see ref man
 #define ADC_SEQ_LEN         (ADC_SAMPLE_CNT * ADC_CHANNEL_CNT)
+
+#if defined STM32F4XX
+// Clock divider
+#define ADC_CLK_DIVIDER     adcDiv2 // 24MHz / 2 = 12MHz
+#define ADC_MAX_SEQ_LEN     16      // 1...16; Const, see ref man
 #if (ADC_SEQ_LEN > ADC_MAX_SEQ_LEN) || (ADC_SEQ_LEN == 0)
 #error "Wrong ADC channel count and sample count"
 #endif
+#endif // #if defined STM32F4XX
 #endif
 
 #if 1 // ========================== USB ========================================
@@ -109,14 +119,14 @@ const uint8_t AdcChannels[] = { SNS_CHNL0, SNS_CHNL1 };
 #define UART_DMA_RX     STM32_DMA1_STREAM5
 #define UART_DMA_CHNL   0   // Dummy
 
-#define LEDWS_DMA       STM32_DMA1_STREAM3
+//#define LEDWS_DMA       STM32_DMA1_STREAM3
 
 #if ADC_REQUIRED
 /* DMA request mapped on this DMA channel only if the corresponding remapping bit is cleared in the SYSCFG_CFGR1
  * register. For more details, please refer to Section10.1.1: SYSCFG configuration register 1 (SYSCFG_CFGR1) on
  * page173 */
 #define ADC_DMA         STM32_DMA1_STREAM1
-#define ADC_DMA_MODE    STM32_DMA_CR_CHSEL(0) |   /* DMA2 Stream4 Channel0 */ \
+#define ADC_DMA_MODE    STM32_DMA_CR_CHSEL(0) |   /* Ignored for F0xx */ \
                         DMA_PRIORITY_LOW | \
                         STM32_DMA_CR_MSIZE_HWORD | \
                         STM32_DMA_CR_PSIZE_HWORD | \

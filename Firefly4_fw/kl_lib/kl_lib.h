@@ -78,6 +78,7 @@ typedef void (*ftVoidPVoidLen)(void*p, uint32_t Len);
 #define ABS(a)      ( ((a) < 0)? -(a) : (a) )
 #define TRIM_VALUE(v, Max)  { if((v) > (Max)) (v) = (Max); }
 #define IS_LIKE(v, precise, deviation)  (((precise - deviation) < v) and (v < (precise + deviation)))
+#define BitIsSet(r, b)  ((r) & (b))
 
 template <typename T>
 static T Average(T *p, uint32_t Len) {
