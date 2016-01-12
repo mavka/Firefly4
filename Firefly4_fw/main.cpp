@@ -15,10 +15,10 @@ App_t App;
 
 int main(void) {
     // ==== Setup clock frequency ====
-    __attribute__((unused)) uint8_t r = 0;
+    uint8_t rslt = 0;
     Clk.EnablePrefetch();
     Clk.SetupBusDividers(ahbDiv2, apbDiv1); // 48MHz/2 == 24MHz
-//  r = Clk.SwitchTo(csHSI48);
+    rslt = Clk.SwitchTo(csHSI48);
     Clk.UpdateFreqValues();
 
     // Init OS
@@ -32,18 +32,20 @@ int main(void) {
     Clk.PrintFreqs();
     App.InitThread();
 
+    Uart.Printf("rcc cfgr = %X\r", RCC->CFGR);
+
 //    Adc.Init();
 //    PinSetupAnalog(SNS_GPIO, SNS_PIN0);
 //    PinSetupAnalog(SNS_GPIO, SNS_PIN1);
 
-//    UsbKBrd.Init();
-//
-    if(r == OK) {
-//        Clk.SelectUSBClock_HSI48();
-//        Clk.EnableCRS();
-//        UsbKBrd.Connect();
+    UsbKBrd.Init();
+
+    if(rslt == OK) {
+        Clk.SelectUSBClock_HSI48();
+        Clk.EnableCRS();
+        UsbKBrd.Connect();
     }
-    else Uart.Printf("Hsi Fail\r");
+    else Uart.Printf("Hsi Fail: %u\r", rslt);
 
     // Main cycle
     App.ITask();
@@ -67,18 +69,18 @@ void App_t::ITask() {
         }
 
         // ==== ADC ====
-        if(EvtMsk & EVTMSK_SAMPLING) {
-//            Adc.StartMeasurement();
-        }
-        if(EvtMsk & EVTMSK_ADC_DONE) {
-            uint32_t Sns0 = Adc.GetResult(SNS_CHNL0);
-            uint32_t Sns1 = Adc.GetResult(SNS_CHNL1);
-            ProcessValues(Sns0, Sns1);
-        }
-
-        if(EvtMsk & EVTMSK_RESET) {
-            ResetCounters();
-        }
+//        if(EvtMsk & EVTMSK_SAMPLING) {
+////            Adc.StartMeasurement();
+//        }
+//        if(EvtMsk & EVTMSK_ADC_DONE) {
+//            uint32_t Sns0 = Adc.GetResult(SNS_CHNL0);
+//            uint32_t Sns1 = Adc.GetResult(SNS_CHNL1);
+//            ProcessValues(Sns0, Sns1);
+//        }
+//
+//        if(EvtMsk & EVTMSK_RESET) {
+//            ResetCounters();
+//        }
     } // while true
 }
 

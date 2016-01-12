@@ -12,7 +12,7 @@
 
 Clk_t Clk;
 
-#define CLK_STARTUP_TIMEOUT     63000
+#define CLK_STARTUP_TIMEOUT     630000
 
 #if defined STM32L1XX
 // ==== Inner use ====
@@ -265,7 +265,7 @@ uint8_t Clk_t::EnableHSI48() {
         if(RCC->CR2 & RCC_CR2_HSI48RDY) return 0;   // PLL is ready
         StartUpCounter++;
     } while(StartUpCounter < CLK_STARTUP_TIMEOUT);
-    return 1; // Timeout
+    return TIMEOUT;
 }
 
 void Clk_t::UpdateFreqValues() {
@@ -330,10 +330,10 @@ void Clk_t::SetupBusDividers(AHBDiv_t AHBDiv, APBDiv_t APBDiv) {
 static inline uint8_t WaitSWS(uint32_t Desired) {
     uint32_t StartUpCounter=0;
     do {
-        if((RCC->CFGR & RCC_CFGR_SWS) == Desired) return 0; // Done
+        if((RCC->CFGR & RCC_CFGR_SWS) == Desired) return OK; // Done
         StartUpCounter++;
     } while(StartUpCounter < CLK_STARTUP_TIMEOUT);
-    return 1; // Timeout
+    return 41;
 }
 
 // Enables HSI, switches to HSI
@@ -341,30 +341,30 @@ uint8_t Clk_t::SwitchTo(ClkSrc_t AClkSrc) {
     uint32_t tmp = RCC->CFGR & ~RCC_CFGR_SW;
     switch(AClkSrc) {
         case csHSI:
-            if(EnableHSI() != OK) return 1;
+            if(EnableHSI() != OK) return 11;
             RCC->CFGR = tmp | RCC_CFGR_SW_HSI;  // Select HSI as system clock src
             return WaitSWS(RCC_CFGR_SWS_HSI);
             break;
 
         case csHSE:
-            if(EnableHSE() != OK) return 2;
+            if(EnableHSE() != OK) return 12;
             RCC->CFGR = tmp | RCC_CFGR_SW_HSE;  // Select HSE as system clock src
             return WaitSWS(RCC_CFGR_SWS_HSE);
             break;
 
         case csPLL:
-            if(EnablePLL() != OK) return 3;
+            if(EnablePLL() != OK) return 13;
             RCC->CFGR = tmp | RCC_CFGR_SW_PLL; // Select PLL as system clock src
             return WaitSWS(RCC_CFGR_SWS_PLL);
             break;
 
         case csHSI48:
-            if(EnableHSI48() != OK) return FAILURE;
+            if(EnableHSI48() != OK) return 14;
             RCC->CFGR = tmp | RCC_CFGR_SW_HSI48;
             return WaitSWS(RCC_CFGR_SWS_HSI48);
             break;
     } // switch
-    return FAILURE;
+    return CMD_UNKNOWN;
 }
 
 // Disable PLL first!
