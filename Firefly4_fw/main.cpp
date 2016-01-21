@@ -26,17 +26,15 @@ int main(void) {
     chSysInit();
 
     // ==== Init hardware ====
-    SYSCFG->CFGR1 |= SYSCFG_CFGR1_USART1TX_DMA_RMP | SYSCFG_CFGR1_USART1RX_DMA_RMP;
+    SYSCFG->CFGR1 |= SYSCFG_CFGR1_USART1TX_DMA_RMP | SYSCFG_CFGR1_USART1RX_DMA_RMP; // Remap UART DMA
     Uart.Init(115200, UART_GPIO, UART_TX_PIN, UART_GPIO, UART_RX_PIN);
     Uart.Printf("\r%S %S\r", APP_NAME, APP_VERSION);
     Clk.PrintFreqs();
     App.InitThread();
 
-    Uart.Printf("rcc cfgr = %X\r", RCC->CFGR);
-
-//    Adc.Init();
-//    PinSetupAnalog(SNS_GPIO, SNS_PIN0);
-//    PinSetupAnalog(SNS_GPIO, SNS_PIN1);
+    Adc.Init();
+    PinSetupAnalog(SNS_GPIO, SNS_PIN0);
+    PinSetupAnalog(SNS_GPIO, SNS_PIN1);
 
     UsbKBrd.Init();
 
@@ -53,8 +51,8 @@ int main(void) {
 
 __attribute__ ((__noreturn__))
 void App_t::ITask() {
-//    TmrSampling.InitAndStart(PThread, MS2ST(SAMPLING_INTERVAL_MS), EVTMSK_SAMPLING, tvtPeriodic);
-//    TmrReset.Init(PThread, MS2ST(RESET_INTERVAL), EVTMSK_RESET, tvtOneShot);
+    TmrSampling.InitAndStart(PThread, MS2ST(SAMPLING_INTERVAL_MS), EVTMSK_SAMPLING, tvtPeriodic);
+    TmrReset.Init(PThread, MS2ST(RESET_INTERVAL), EVTMSK_RESET, tvtOneShot);
 
     while(true) {
         uint32_t EvtMsk = chEvtWaitAny(ALL_EVENTS);
@@ -69,18 +67,18 @@ void App_t::ITask() {
         }
 
         // ==== ADC ====
-//        if(EvtMsk & EVTMSK_SAMPLING) {
-////            Adc.StartMeasurement();
-//        }
-//        if(EvtMsk & EVTMSK_ADC_DONE) {
-//            uint32_t Sns0 = Adc.GetResult(SNS_CHNL0);
-//            uint32_t Sns1 = Adc.GetResult(SNS_CHNL1);
-//            ProcessValues(Sns0, Sns1);
-//        }
-//
-//        if(EvtMsk & EVTMSK_RESET) {
-//            ResetCounters();
-//        }
+        if(EvtMsk & EVTMSK_SAMPLING) {
+            Adc.StartMeasurement();
+        }
+        if(EvtMsk & EVTMSK_ADC_DONE) {
+            uint32_t Sns0 = Adc.GetResult(SNS_CHNL0);
+            uint32_t Sns1 = Adc.GetResult(SNS_CHNL1);
+            ProcessValues(Sns0, Sns1);
+        }
+
+        if(EvtMsk & EVTMSK_RESET) {
+            ResetCounters();
+        }
     } // while true
 }
 
