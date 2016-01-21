@@ -31,8 +31,8 @@
 #define T1H_N_4MHz          3
 #define T_TOTAL_N_4MHz      18
 #define T0H_N_24MHz         10
-#define T1H_N_24MHz         22
-#define T_TOTAL_N_24MHz     33
+#define T1H_N_24MHz         19
+#define T_TOTAL_N_24MHz     27
 
 enum ClrSetupMode_t {csmOneByOne, csmSimultaneously};
 
@@ -77,7 +77,7 @@ public:
 
 class LedWs_t {
 private:
-    PinOutputPWM_t<T_TOTAL_N_4MHz, invNotInverted, omPushPull> TxTmr{LEDWS_GPIO, LEDWS_PIN, LEDWS_TMR, LEDWS_TMR_CH};
+    PinOutputPWM_t<T_TOTAL_N_4MHz, invNotInverted, omOpenDrain> TxTmr{LEDWS_GPIO, LEDWS_PIN, LEDWS_TMR, LEDWS_TMR_CH};
     uint8_t T0H_N = T0H_N_4MHz, T1H_N = T1H_N_4MHz;
     virtual_timer_t ITmr;
     uint8_t BitBuf[TOTAL_BIT_CNT], *PBit;

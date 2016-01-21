@@ -53,13 +53,13 @@ void App_t::ITask() {
             uint8_t r = Clk.SwitchTo(csHSI48);
             Clk.UpdateFreqValues();
             Uart.OnAHBFreqChange();
-            LedWs.OnAHBFreqChange();
             chSysUnlock();
             Clk.PrintFreqs();
             if(r == OK) {
                 Clk.SelectUSBClock_HSI48();
                 Clk.EnableCRS();
                 UsbCDC.Connect();
+                LedWs.OnAHBFreqChange();
             }
             else Uart.Printf("Hsi Fail\r");
         }

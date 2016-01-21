@@ -41,7 +41,7 @@ void LedWs_t::Init() {
     TxTmr.Disable();
 
     // Zero buffer
-    for(uint32_t i=0; i<RST_BIT_CNT; i++) BitBuf[i] = 0;
+    for(uint32_t i=DATA_BIT_CNT; i<TOTAL_BIT_CNT; i++) BitBuf[i] = 0;
 
     // ==== DMA ====
     dmaStreamAllocate     (LEDWS_DMA, IRQ_PRIO_LOW, LedTxcIrq, NULL);
@@ -146,20 +146,31 @@ void LedWs_t::AppendBitsMadeOfByte(uint8_t Byte) {
 }
 
 void LedWs_t::ISetCurrentColors() {
-//    for(uint8_t i=0; i<LED_CNT; i++) Uart.PrintfI("* %u %u %u\r", IClr[i].R, IClr[i].G, IClr[i].B);
+    TxTmr.Disable();
+    TxTmr.SetCounter(0);
+    TxTmr.GenerateUpdateEvt();
+
+    //    for(uint8_t i=0; i<LED_CNT; i++) Uart.PrintfI("* %u %u %u\r", IClr[i].R, IClr[i].G, IClr[i].B);
 //    Uart.PrintfI("\r");
     // Fill bit buffer
-    PBit = &BitBuf[RST_BIT_CNT];
+//    PBit = &BitBuf[RST_BIT_CNT];
+    PBit = BitBuf;
     for(uint32_t i=0; i<LED_CNT; i++) {
         AppendBitsMadeOfByte(IClr[i].G);
         AppendBitsMadeOfByte(IClr[i].R);
         AppendBitsMadeOfByte(IClr[i].B);
     }
+
+    // Change first 1 duration
+    BitBuf[0] -= 2;
+
+//    for(uint8_t i=0; i<TOTAL_BIT_CNT; i++) Uart.PrintfI("%u\r", BitBuf[i]);
+
     // Start transmission
     dmaStreamSetTransactionSize(LEDWS_DMA, TOTAL_BIT_CNT);
     dmaStreamSetMode(LEDWS_DMA, LED_DMA_MODE);
     dmaStreamEnable(LEDWS_DMA);
-    TxTmr.SetCounter(0);
+
 
 //    chSysLockFromIsr();
     TxTmr.Enable();
