@@ -17,9 +17,9 @@
 #define APP_NAME            "GestRec_f4"
 #define APP_VERSION         __DATE__ " " __TIME__
 
-#define SNS_LOW_THRESHOLD       1530
+#define SNS_LOW_THRESHOLD       999
 #define SNS_HIGH_THRESHOLD      1710
-#define SAMPLING_INTERVAL_MS    11
+#define SAMPLING_INTERVAL_MS    110
 #define RESET_INTERVAL          2700
 
 class App_t {
