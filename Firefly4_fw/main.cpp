@@ -36,23 +36,22 @@ int main(void) {
     PinSetupAnalog(SNS_GPIO, SNS_PIN0);
     PinSetupAnalog(SNS_GPIO, SNS_PIN1);
 
-//    UsbKBrd.Init();
-//
-//    if(rslt == OK) {
-//        Clk.SelectUSBClock_HSI48();
-//        Clk.EnableCRS();
-//        UsbKBrd.Connect();
-//    }
-//    else Uart.Printf("Hsi Fail: %u\r", rslt);
+    UsbKBrd.Init();
+
+    if(rslt == OK) {
+        Clk.SelectUSBClock_HSI48();
+        Clk.EnableCRS();
+        UsbKBrd.Connect();
+    }
+    else Uart.Printf("Hsi Fail: %u\r", rslt);
 
     // Main cycle
     App.ITask();
 }
 
-__attribute__ ((__noreturn__))
+__noreturn
 void App_t::ITask() {
     TmrSampling.InitAndStart(PThread, MS2ST(SAMPLING_INTERVAL_MS), EVTMSK_SAMPLING, tktPeriodic);
-    TmrReset.Init(PThread, MS2ST(RESET_INTERVAL), EVTMSK_RESET, tktOneShot);
 
     while(true) {
         uint32_t EvtMsk = chEvtWaitAny(ALL_EVENTS);
@@ -75,10 +74,6 @@ void App_t::ITask() {
             uint32_t Sns1 = Adc.GetResult(SNS_CHNL1);
             ProcessValues(Sns0, Sns1);
         }
-
-        if(EvtMsk & EVTMSK_RESET) {
-            ResetCounters();
-        }
     } // while true
 }
 
@@ -92,7 +87,7 @@ static void RecCallback(void *p) {
 //    Uart.PrintfI("TO\r");
 }
 
-static uint32_t cnt = 0;
+__unused static uint32_t cnt = 0;
 
 void App_t::ProcessValues(uint32_t Sns0, uint32_t Sns1) {
 //    Uart.Printf("%03u %03u\r\n", Sns0, Sns1);

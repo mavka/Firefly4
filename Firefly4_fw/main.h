@@ -5,8 +5,7 @@
  *      Author: Kreyl
  */
 
-#ifndef MAIN_H_
-#define MAIN_H_
+#pragma once
 
 #include "ch.h"
 #include "kl_lib.h"
@@ -14,8 +13,8 @@
 #include "evt_mask.h"
 #include "board.h"
 
-#define APP_NAME            "GestRec"
-#define APP_VERSION         __DATE__ " " __TIME__
+#define APP_NAME                "GestRec"
+#define APP_VERSION             __DATE__ " " __TIME__
 
 #define SNS_THRESHOLD           999
 #define SAMPLING_INTERVAL_MS    11
@@ -24,16 +23,6 @@
 class App_t {
 private:
     thread_t *PThread;
-    TmrKL_t TmrReset;
-    LowHigh_t Prev0 = Low, Prev1 = Low;
-    LowHigh_t Normalize(uint32_t X, LowHigh_t PrevX);
-    RiseFall_t DetectEdge(LowHigh_t X, LowHigh_t PrevX);
-    uint32_t CntU=0, CntD=0;
-    void ResetCounters() {
-        CntU=0;
-        CntD=0;
-        TmrReset.Stop();
-    }
     void ProcessValues(uint32_t Sns0, uint32_t Sns1);
 public:
     TmrKL_t TmrSampling;
@@ -51,6 +40,3 @@ public:
 };
 
 extern App_t App;
-
-
-#endif /* MAIN_H_ */

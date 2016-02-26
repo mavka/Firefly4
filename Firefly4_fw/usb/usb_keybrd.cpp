@@ -18,11 +18,12 @@ UsbKBrd_t UsbKBrd;
 static bool OnSetupPkt(USBDriver *usbp);
 static void OnUsbEvent(USBDriver *usbp, usbevent_t event);
 
-static USBInEndpointState ep1Instate;
 const USBDescriptor *pDesc;
 
 #if 1 // ========================== Endpoints ==================================
 // ==== EP1 ====
+static USBInEndpointState ep1Instate;
+
 static void EpInCallback(USBDriver *usbp, usbep_t ep) {
 	chSysLockFromISR();
 	UsbKBrd.ISendInReportI();
@@ -55,7 +56,7 @@ static const USBConfig UsbCfg = {
 };
 
 void OnUsbEvent(USBDriver *usbp, usbevent_t event) {
-//	Uart.PrintfI("USB evt=%X\r", event);
+	Uart.PrintfI("USB evt=%X\r", event);
     switch (event) {
         case USB_EVENT_RESET:
             return;
@@ -152,7 +153,7 @@ void UsbKBrd_t::Init() {
 
 void UsbKBrd_t::Connect() {
     usbDisconnectBus();
-    chThdSleepMilliseconds(1500);
+    chThdSleepMilliseconds(1008);
     usbStart(&USBD1, &UsbCfg);
     usbConnectBus();
 }
