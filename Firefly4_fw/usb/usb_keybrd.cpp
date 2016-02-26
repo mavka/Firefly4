@@ -12,11 +12,13 @@
 #include "usb.h"
 #include "usb_lld.h"
 #include "main.h"
+#include "kl_usb_defins.h"
 
 UsbKBrd_t UsbKBrd;
 
 static bool OnSetupPkt(USBDriver *usbp);
 static void OnUsbEvent(USBDriver *usbp, usbevent_t event);
+static uint8_t DummyByte;
 
 const USBDescriptor *pDesc;
 
@@ -56,7 +58,7 @@ static const USBConfig UsbCfg = {
 };
 
 void OnUsbEvent(USBDriver *usbp, usbevent_t event) {
-	Uart.PrintfI("USB evt=%X\r", event);
+//	Uart.PrintfI("USB evt=%X\r", event);
     switch (event) {
         case USB_EVENT_RESET:
             return;
@@ -94,7 +96,7 @@ void OnUsbEvent(USBDriver *usbp, usbevent_t event) {
 bool OnSetupPkt(USBDriver *usbp) {
     SetupPkt_t *Setup = (SetupPkt_t*)usbp->setup;
 //    Uart.PrintfI("\rSetup: %A", usbp->setup, 8, ' ');
-    if((Setup->bmRequestType & USB_RTYPE_TYPE_MASK) == USB_RTYPE_TYPE_CLASS) {
+    if(Setup->ReqType.Type == TYPE_CLASS) {
 //    	Uart.PrintfI("\rSetup: %A", usbp->setup, 8, ' ');
     	switch(Setup->bRequest) {
     		// This request is mandatory and must be supported by all devices
@@ -105,6 +107,13 @@ bool OnSetupPkt(USBDriver *usbp) {
     				return true;
     			}
     			break;
+    		case HID_REQ_SetReport:
+    		    if(Setup->wLength == 1) {
+    		        usbSetupTransfer(usbp, &DummyByte, 1, NULL);    // Just receive it doing nothing else
+    		        return true;
+    		    }
+    		    break;
+
     		// This request is required only for boot devices
     		case HID_REQ_GetProtocol:
     			// The Get_Protocol request reads which protocol is currently active (either the boot
@@ -130,7 +139,10 @@ bool OnSetupPkt(USBDriver *usbp) {
     } // if class
 
     // GetDescriptor for HID class
-    if(Setup->bmRequestType == 0x81 and Setup->bRequest == USB_REQ_GET_DESCRIPTOR) {
+    if(Setup->ReqType.Direction == DIR_DEV2HOST and
+       Setup->ReqType.Type == TYPE_STANDARD and
+       Setup->ReqType.Recipient == RCPT_INTERFACE and
+       Setup->bRequest == USB_REQ_GET_DESCRIPTOR) {
     	// The low byte is the Descriptor Index used to specify the set for Physical
     	// Descriptors, and is reset to zero for other HID class descriptors
     	if(Setup->wValueLSB == 0) {

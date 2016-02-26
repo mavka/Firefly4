@@ -107,6 +107,7 @@ void App_t::ProcessValues(uint32_t Sns0, uint32_t Sns1) {
             Uart.Printf("%u\r", cnt++);
             RecState = rsIdle;
             chVTReset(&TmrTimeout);
+            UsbKBrd.PressAndRelease(HID_KEYBOARD_SC_A);
 //            Uart.Printf("Idle\r");
         }
     }

@@ -8,14 +8,13 @@
 #ifndef USB_USB_KEYBRD_H_
 #define USB_USB_KEYBRD_H_
 
-#include "usb_common.h"
 #include "HIDClassCommon.h"
 #include "kl_buf.h"
 
 // Size of buffer for reports
 #define USB_KBRD_REPBUF_CNT		7
 
-class UsbKBrd_t : public UsbCommon_t {
+class UsbKBrd_t {
 private:
 public:
     void Init();
