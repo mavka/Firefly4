@@ -14,18 +14,17 @@
 #include "evt_mask.h"
 #include "board.h"
 
-#define APP_NAME            "GestRec_f4"
+#define APP_NAME            "GestRec"
 #define APP_VERSION         __DATE__ " " __TIME__
 
-#define SNS_LOW_THRESHOLD       999
-#define SNS_HIGH_THRESHOLD      1710
-#define SAMPLING_INTERVAL_MS    110
+#define SNS_THRESHOLD           999
+#define SAMPLING_INTERVAL_MS    11
 #define RESET_INTERVAL          2700
 
 class App_t {
 private:
     thread_t *PThread;
-    TmrVirtual_t TmrReset;
+    TmrKL_t TmrReset;
     LowHigh_t Prev0 = Low, Prev1 = Low;
     LowHigh_t Normalize(uint32_t X, LowHigh_t PrevX);
     RiseFall_t DetectEdge(LowHigh_t X, LowHigh_t PrevX);
@@ -37,7 +36,7 @@ private:
     }
     void ProcessValues(uint32_t Sns0, uint32_t Sns1);
 public:
-    TmrVirtual_t TmrSampling;
+    TmrKL_t TmrSampling;
     // Eternal methods
     void InitThread() { PThread = chThdGetSelfX(); }
     void SignalEvt(eventmask_t Evt) {

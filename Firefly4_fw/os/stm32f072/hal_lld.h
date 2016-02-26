@@ -26,9 +26,10 @@
  *          - STM32_HSE_BYPASS (optionally).
  *          .
  *          One of the following macros must also be defined:
- *          - STM32F030x6, STM32F030x8 for Value Line devices.
- *          - STM32F031x6, STM32F038xx, STM32F042x6, STM32F048xx for
- *            Low Density devices.
+ *          - STM32F030x6, STM32F030x8, STM32F030xC, STM32F070x6,
+ *            STM32F070xB for Value Line devices.
+ *          - STM32F031x6, STM32F038xx, STM32F042x6, STM32F048xx
+ *            for Low Density devices.
  *          - STM32F051x8, STM32F058xx, STM32F071xB, STM32F072xB,
  *            STM32F078xx for Medium Density devices.
  *          .
@@ -44,7 +45,6 @@
  * Registry definitions.
  */
 #include "stm32_registry.h"
-#include "board.h" // @KL
 
 /*===========================================================================*/
 /* Driver constants.                                                         */
@@ -86,6 +86,21 @@
 
 #elif defined(STM32F030x8)
 #define PLATFORM_NAME           "STM32F030x8 Entry Level Value Line devices"
+
+#elif defined(STM32F030xC)
+#define PLATFORM_NAME           "STM32F030xC Entry Level Value Line devices"
+
+#elif defined(STM32F070x6)
+#define PLATFORM_NAME           "STM32F070x6 Entry Level Value Line devices"
+
+#elif defined(STM32F070xB)
+#define PLATFORM_NAME           "STM32F070xB Entry Level Value Line devices"
+
+#elif defined(STM32F091xC)
+#define PLATFORM_NAME           "STM32F091xC Entry Level Medium Density devices"
+
+#elif defined(STM32F098xx)
+#define PLATFORM_NAME           "STM32F098xx Entry Level Medium Density devices"
 
 #else
 #error "STM32F0xx device not specified"
@@ -145,11 +160,6 @@
  * @brief   Maximum APB clock frequency.
  */
 #define STM32_PCLK_MAX          48000000
-
-/**
- * @brief   Maximum ADC clock frequency.
- */
-#define STM32_ADCCLK_MAX        14000000
 /** @} */
 
 /**
@@ -219,6 +229,19 @@
 #define STM32_MCOSEL_HSE        (6 << 24)   /**< HSE clock on MCO pin.      */
 #define STM32_MCOSEL_PLLDIV2    (7 << 24)   /**< PLL/2 clock on MCO pin.    */
 #define STM32_MCOSEL_HSI48      (8 << 24)   /**< HSI48 clock on MCO pin.    */
+
+#define STM32_MCOPRE_DIV1       (0 << 28)   /**< MCO divided by 1.          */
+#define STM32_MCOPRE_DIV2       (1 << 28)   /**< MCO divided by 2.          */
+#define STM32_MCOPRE_DIV4       (2 << 28)   /**< MCO divided by 4.          */
+#define STM32_MCOPRE_DIV8       (3 << 28)   /**< MCO divided by 8.          */
+#define STM32_MCOPRE_DIV16      (4 << 28)   /**< MCO divided by 16.         */
+#define STM32_MCOPRE_DIV32      (5 << 28)   /**< MCO divided by 32.         */
+#define STM32_MCOPRE_DIV64      (6 << 28)   /**< MCO divided by 64.         */
+#define STM32_MCOPRE_DIV128     (7 << 28)   /**< MCO divided by 128.        */
+
+#define STM32_PLLNODIV_MASK     (1 << 31)   /**< MCO PLL divider mask.      */
+#define STM32_PLLNODIV_DIV2     (0 << 31)   /**< MCO PLL is divided by two. */
+#define STM32_PLLNODIV_DIV1     (1 << 31)   /**< MCO PLL is divided by one. */
 /** @} */
 
 /**

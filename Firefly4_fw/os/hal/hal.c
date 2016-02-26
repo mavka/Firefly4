@@ -24,26 +24,6 @@
 
 #include "hal.h"
 
-/*===========================================================================*/
-/* Driver local definitions.                                                 */
-/*===========================================================================*/
-
-/*===========================================================================*/
-/* Driver exported variables.                                                */
-/*===========================================================================*/
-
-/*===========================================================================*/
-/* Driver local variables and types.                                         */
-/*===========================================================================*/
-
-/*===========================================================================*/
-/* Driver local functions.                                                   */
-/*===========================================================================*/
-
-/*===========================================================================*/
-/* Driver exported functions.                                                */
-/*===========================================================================*/
-
 /**
  * @brief   HAL initialization.
  * @details This function invokes the low level initialization code then
@@ -56,10 +36,10 @@
 void halInit(void) {
 
   /* Initializes the OS Abstraction Layer.*/
-//  osalInit(); // Nothing inside. @KL
+//  osalInit(); // @KL nothing here
 
   /* Platform low level initializations.*/
-  hal_lld_init();
+  hal_lld_init();   // @KL APB, AHB, DMA, PWR
 
 #if (HAL_USE_PAL == TRUE) || defined(__DOXYGEN__)
   palInit(&pal_default_config);
@@ -117,6 +97,9 @@ void halInit(void) {
 #endif
 #if (HAL_USE_RTC == TRUE) || defined(__DOXYGEN__)
   rtcInit();
+#endif
+#if (HAL_USE_WDG == TRUE) || defined(__DOXYGEN__)
+  wdgInit();
 #endif
 
   /* Community driver overlay initialization.*/

@@ -459,7 +459,7 @@ static inline void osalInit(void) {
  */
 static inline void osalSysHalt(const char *reason) {
 
-  chSysHalt(reason, "");
+  chSysHalt(reason, __func__);  // @KL: + __func__
 }
 
 /**
@@ -539,7 +539,7 @@ static inline void osalSysUnlockFromISR(void) {
  *
  * @xclass
  */
-static inline syssts_t osalSysGetStatusAndLockX(void)  {
+static inline syssts_t osalSysGetStatusAndLockX(void) {
 
   return chSysGetStatusAndLockX();
 }

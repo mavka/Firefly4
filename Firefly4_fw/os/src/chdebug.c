@@ -114,7 +114,7 @@
 void _dbg_check_disable(void) {
 
   if ((ch.dbg.isr_cnt != (cnt_t)0) || (ch.dbg.lock_cnt != (cnt_t)0)) {
-    chSysHalt("SV#1", "");
+    chSysHalt("SV#1", __func__);
   }
 }
 
@@ -126,7 +126,7 @@ void _dbg_check_disable(void) {
 void _dbg_check_suspend(void) {
 
   if ((ch.dbg.isr_cnt != (cnt_t)0) || (ch.dbg.lock_cnt != (cnt_t)0)) {
-    chSysHalt("SV#2", "");
+    chSysHalt("SV#2", __func__);
   }
 }
 
@@ -138,7 +138,7 @@ void _dbg_check_suspend(void) {
 void _dbg_check_enable(void) {
 
   if ((ch.dbg.isr_cnt != (cnt_t)0) || (ch.dbg.lock_cnt != (cnt_t)0)) {
-    chSysHalt("SV#3", "");
+    chSysHalt("SV#3", __func__);
   }
 }
 
@@ -150,7 +150,7 @@ void _dbg_check_enable(void) {
 void _dbg_check_lock(void) {
 
   if ((ch.dbg.isr_cnt != (cnt_t)0) || (ch.dbg.lock_cnt != (cnt_t)0)) {
-    chSysHalt("SV#4", "");
+    chSysHalt("SV#4", __func__);
   }
   _dbg_enter_lock();
 }
@@ -163,7 +163,7 @@ void _dbg_check_lock(void) {
 void _dbg_check_unlock(void) {
 
   if ((ch.dbg.isr_cnt != (cnt_t)0) || (ch.dbg.lock_cnt <= (cnt_t)0)) {
-    chSysHalt("SV#5", "");
+    chSysHalt("SV#5", __func__);
   }
   _dbg_leave_lock();
 }
@@ -176,7 +176,7 @@ void _dbg_check_unlock(void) {
 void _dbg_check_lock_from_isr(void) {
 
   if ((ch.dbg.isr_cnt <= (cnt_t)0) || (ch.dbg.lock_cnt != (cnt_t)0)) {
-    chSysHalt("SV#6", "");
+    chSysHalt("SV#6", __func__);
   }
   _dbg_enter_lock();
 }
@@ -189,7 +189,7 @@ void _dbg_check_lock_from_isr(void) {
 void _dbg_check_unlock_from_isr(void) {
 
   if ((ch.dbg.isr_cnt <= (cnt_t)0) || (ch.dbg.lock_cnt <= (cnt_t)0)) {
-    chSysHalt("SV#7", "");
+    chSysHalt("SV#7", __func__);
   }
   _dbg_leave_lock();
 }
@@ -203,7 +203,7 @@ void _dbg_check_enter_isr(void) {
 
   port_lock_from_isr();
   if ((ch.dbg.isr_cnt < (cnt_t)0) || (ch.dbg.lock_cnt != (cnt_t)0)) {
-    chSysHalt("SV#8", "");
+    chSysHalt("SV#8", __func__);
   }
   ch.dbg.isr_cnt++;
   port_unlock_from_isr();
@@ -218,7 +218,7 @@ void _dbg_check_leave_isr(void) {
 
   port_lock_from_isr();
   if ((ch.dbg.isr_cnt <= (cnt_t)0) || (ch.dbg.lock_cnt != (cnt_t)0)) {
-    chSysHalt("SV#9", "");
+    chSysHalt("SV#9", __func__);
   }
   ch.dbg.isr_cnt--;
   port_unlock_from_isr();
@@ -250,7 +250,7 @@ void chDbgCheckClassI(void) {
 void chDbgCheckClassS(void) {
 
   if ((ch.dbg.isr_cnt != (cnt_t)0) || (ch.dbg.lock_cnt <= (cnt_t)0)) {
-    chSysHalt("SV#11", "");
+    chSysHalt("SV#11", __func__);
   }
 }
 

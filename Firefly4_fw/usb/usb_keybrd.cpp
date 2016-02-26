@@ -168,8 +168,7 @@ void UsbKBrd_t::ISendInReportI() {
 	}
 	// Send report if there are changes or should send repeatedly
 	if(p != nullptr) {
-		usbPrepareTransmit(&USBDrv, EP_DATA_IN_ID, (uint8_t*)p, USB_KEYBRD_REPORT_SZ);
-		usbStartTransmitI(&USBDrv, EP_DATA_IN_ID);
+		usbStartTransmitI(&USBDrv, EP_DATA_IN_ID, (uint8_t*)p, USB_KEYBRD_REPORT_SZ);
 	}
 }
 

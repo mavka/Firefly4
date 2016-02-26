@@ -18,21 +18,29 @@
 */
 
 /**
- * @file    chmemcore.h
- * @brief   Core memory manager macros and structures.
+ * @file    chcustomer.h
+ * @brief   Customer-related info.
  *
- * @addtogroup memcore
+ * @addtogroup customer
  * @{
  */
 
-#ifndef _CHMEMCORE_H_
-#define _CHMEMCORE_H_
-
-#if (CH_CFG_USE_MEMCORE == TRUE) || defined(__DOXYGEN__)
+#ifndef _CHCUSTOMER_H_
+#define _CHCUSTOMER_H_
 
 /*===========================================================================*/
 /* Module constants.                                                         */
 /*===========================================================================*/
+
+/**
+ * @brief   Customer readable identifier.
+ */
+#define CH_CUSTOMER_ID_STRING               "Santa, North Pole"
+
+/**
+ * @brief   Customer code.
+ */
+#define CH_CUSTOMER_ID_CODE                 "xxxx-yyyy"
 
 /*===========================================================================*/
 /* Module pre-compile time settings.                                         */
@@ -46,66 +54,18 @@
 /* Module data structures and types.                                         */
 /*===========================================================================*/
 
-/**
- * @brief   Memory get function.
- */
-typedef void *(*memgetfunc_t)(size_t size);
-
 /*===========================================================================*/
 /* Module macros.                                                            */
 /*===========================================================================*/
-
-/**
- * @name    Alignment support macros
- */
-/**
- * @brief   Alignment size constant.
- */
-#define MEM_ALIGN_SIZE      sizeof(stkalign_t)
-
-/**
- * @brief   Alignment mask constant.
- */
-#define MEM_ALIGN_MASK      (MEM_ALIGN_SIZE - 1U)
-
-/**
- * @brief   Alignment helper macro.
- */
-#define MEM_ALIGN_PREV(p)   ((size_t)(p) & ~MEM_ALIGN_MASK)
-
-/**
- * @brief   Alignment helper macro.
- */
-#define MEM_ALIGN_NEXT(p)   MEM_ALIGN_PREV((size_t)(p) + MEM_ALIGN_MASK)
-
-/**
- * @brief   Returns whatever a pointer or memory size is aligned to
- *          the type @p stkalign_t.
- */
-#define MEM_IS_ALIGNED(p)   (((size_t)(p) & MEM_ALIGN_MASK) == 0U)
-/** @} */
 
 /*===========================================================================*/
 /* External declarations.                                                    */
 /*===========================================================================*/
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-  void _core_init(void);
-  void *chCoreAlloc(size_t size);
-  void *chCoreAllocI(size_t size);
-  size_t chCoreGetStatusX(void);
-#ifdef __cplusplus
-}
-#endif
-
 /*===========================================================================*/
 /* Module inline functions.                                                  */
 /*===========================================================================*/
 
-#endif /* CH_CFG_USE_MEMCORE == TRUE */
-
-#endif /* _CHMEMCORE_H_ */
+#endif /* _CHCUSTOMER_H_ */
 
 /** @} */

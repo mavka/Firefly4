@@ -51,8 +51,8 @@ int main(void) {
 
 __attribute__ ((__noreturn__))
 void App_t::ITask() {
-    TmrSampling.InitAndStart(PThread, MS2ST(SAMPLING_INTERVAL_MS), EVTMSK_SAMPLING, tvtPeriodic);
-    TmrReset.Init(PThread, MS2ST(RESET_INTERVAL), EVTMSK_RESET, tvtOneShot);
+    TmrSampling.InitAndStart(PThread, MS2ST(SAMPLING_INTERVAL_MS), EVTMSK_SAMPLING, tktPeriodic);
+    TmrReset.Init(PThread, MS2ST(RESET_INTERVAL), EVTMSK_RESET, tktOneShot);
 
     while(true) {
         uint32_t EvtMsk = chEvtWaitAny(ALL_EVENTS);
@@ -83,53 +83,38 @@ void App_t::ITask() {
 }
 
 #if 1 // ======================= Signal processing =============================
-enum RecState_t {rsIdle, rsEnter,
+enum RecState_t {rsIdle, rsEnter};
+static RecState_t RecState = rsIdle;
+
+static virtual_timer_t TmrTimeout;
+static void RecCallback(void *p) {
+    RecState = rsIdle;
+//    Uart.PrintfI("TO\r");
+}
+
+static uint32_t cnt = 0;
 
 void App_t::ProcessValues(uint32_t Sns0, uint32_t Sns1) {
-    Uart.Printf("%03u %03u\r\n", Sns0, Sns1);
-    Sns0 = (Sns0 > SNS_LOW_THRESHOLD)? 1 : 0;
-    Sns1 = (Sns1 > SNS_LOW_THRESHOLD)? 1 : 0;
+//    Uart.Printf("%03u %03u\r\n", Sns0, Sns1);
+    Sns0 = (Sns0 > SNS_THRESHOLD)? 1 : 0;
+    Sns1 = (Sns1 > SNS_THRESHOLD)? 1 : 0;
 
-    if(Sns0 == 1 and Sns1 == 0)
-
-    // Normalize
-//    LowHigh_t Norm0, Norm1;
-//    Norm0 = Normalize(Sns0, Prev0);
-//    Norm1 = Normalize(Sns1, Prev1);
-////    Uart.Printf("    %u; %u\r", Norm0, Norm1);
-//    // Detect edge
-//    RiseFall_t Edge0 = DetectEdge(Norm0, Prev0);
-//    RiseFall_t Edge1 = DetectEdge(Norm1, Prev1);
-//    // Detect gesture
-//    if((Edge0 == rfRising and Norm1 == Low) or (Edge0 == rfFalling and Norm1 == High)) CntD++;
-//    else if((Edge1== rfRising and Norm0 == Low) or (Edge1 == rfFalling and Norm0 == High)) CntU++;
-//    // Save current values as previous
-//    Prev0 = Norm0;
-//    Prev1 = Norm1;
-//    // Start timer
-//    if(CntD == 1 or CntU == 1) TmrReset.StartIfNotRunning();
-//    // Send event if gesture recognized
-//    if(CntD >= 2) {
-//        ResetCounters();
-//        Uart.Printf("Down\r");
-//        UsbKBrd.PressAndRelease(HID_KEYBOARD_SC_A);
-//    }
-//    else if(CntU >= 2) {
-//        ResetCounters();
-//        Uart.Printf("Up\r");
-////        UsbKBrd.PressAndRelease(HID_KEYBOARD_SC_A);
-//    }
-}
-
-LowHigh_t App_t::Normalize(uint32_t X, LowHigh_t PrevX) {
-    if(PrevX == Low) return (X > SNS_HIGH_THRESHOLD)? High : Low;
-    else return (X < SNS_LOW_THRESHOLD)? Low : High;
-}
-
-RiseFall_t App_t::DetectEdge(LowHigh_t X, LowHigh_t PrevX) {
-    if(X > PrevX) return rfRising;
-    else if(X < PrevX) return rfFalling;
-    else return rfNone;
+    if(RecState == rsIdle) {
+        if(Sns0 == 1 and Sns1 == 0) {
+//            Uart.Printf("Enter\r");
+            RecState = rsEnter;
+            chVTSet(&TmrTimeout, MS2ST(999), RecCallback, nullptr);
+        }
+    }
+    // rsEnter
+    else {
+        if(Sns1 == 1) {
+            Uart.Printf("%u\r", cnt++);
+            RecState = rsIdle;
+            chVTReset(&TmrTimeout);
+//            Uart.Printf("Idle\r");
+        }
+    }
 }
 #endif
 
