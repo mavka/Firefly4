@@ -186,8 +186,9 @@ void UsbKBrd_t::ISendInReportI() {
 }
 
 #if 1 // ========================= High level ===============================
-void UsbKBrd_t::PressKey(uint8_t KeyCode) {
+void UsbKBrd_t::PressKey(uint8_t KeyCode, uint8_t Modifiers) {
 	chSysLock();
+	LastReport.Modifier |= Modifiers;
 	// Check if already pressed
 	bool AlreadyPressed = false;
 	uint8_t EmptyPosition = 0xFF;
@@ -206,7 +207,7 @@ void UsbKBrd_t::PressKey(uint8_t KeyCode) {
 	}
 	chSysUnlock();
 }
-void UsbKBrd_t::DepressKey(uint8_t KeyCode) {
+void UsbKBrd_t::ReleaseKey(uint8_t KeyCode) {
 	chSysLock();
 	for(uint8_t i=0; i<6; i++) {
 		if(LastReport.KeyCode[i] == KeyCode) {
@@ -219,8 +220,32 @@ void UsbKBrd_t::DepressKey(uint8_t KeyCode) {
 	chSysUnlock();
 }
 
+void UsbKBrd_t::PressModifier(uint8_t Modifier) {
+    chSysLock();
+    LastReport.Modifier |= Modifier;
+    IReports.Put(&LastReport);
+    ISendInReportI();
+    chSysUnlock();
+}
+void UsbKBrd_t::ReleaseModifier(uint8_t Modifier) {
+    chSysLock();
+    LastReport.Modifier &= ~Modifier;
+    IReports.Put(&LastReport);
+    ISendInReportI();
+    chSysUnlock();
+}
+
 void UsbKBrd_t::PressAndRelease(uint8_t KeyCode) {
 	PressKey(KeyCode);
-	DepressKey(KeyCode);
+	ReleaseKey(KeyCode);
+}
+
+void UsbKBrd_t::ReleaseAll() {
+    chSysLock();
+    LastReport.Modifier = 0;
+    for(uint8_t i=0; i<6; i++) LastReport.KeyCode[i] = 0;
+    IReports.Put(&LastReport);
+    ISendInReportI();
+    chSysUnlock();
 }
 #endif

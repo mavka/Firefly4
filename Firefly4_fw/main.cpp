@@ -78,7 +78,7 @@ void App_t::ITask() {
 }
 
 #if 1 // ======================= Signal processing =============================
-enum RecState_t {rsIdle, rsEnter};
+enum RecState_t {rsIdle, rsEnter, rsWaitIdle};
 static RecState_t RecState = rsIdle;
 
 static virtual_timer_t TmrTimeout;
@@ -94,23 +94,34 @@ void App_t::ProcessValues(uint32_t Sns0, uint32_t Sns1) {
     Sns0 = (Sns0 > SNS_THRESHOLD)? 1 : 0;
     Sns1 = (Sns1 > SNS_THRESHOLD)? 1 : 0;
 
-    if(RecState == rsIdle) {
-        if(Sns0 == 1 and Sns1 == 0) {
-//            Uart.Printf("Enter\r");
-            RecState = rsEnter;
-            chVTSet(&TmrTimeout, MS2ST(999), RecCallback, nullptr);
-        }
-    }
-    // rsEnter
-    else {
-        if(Sns1 == 1) {
-            Uart.Printf("%u\r", cnt++);
-            RecState = rsIdle;
-            chVTReset(&TmrTimeout);
-            UsbKBrd.PressAndRelease(HID_KEYBOARD_SC_A);
-//            Uart.Printf("Idle\r");
-        }
-    }
+    switch(RecState) {
+        case rsIdle:
+            if(Sns0 == 1 and Sns1 == 0) {
+//                Uart.Printf("Enter\r");
+                RecState = rsEnter;
+                chVTSet(&TmrTimeout, MS2ST(999), RecCallback, nullptr);
+            }
+            break;
+
+        case rsEnter:
+            if(Sns1 == 1) {
+                Uart.Printf("%u\r", cnt++);
+                RecState = rsWaitIdle;
+                chVTReset(&TmrTimeout);
+                UsbKBrd.PressKey(HID_KEYBOARD_SC_SPACE, HID_KEYBOARD_MODIFIER_LEFTGUI);
+//                UsbKBrd.ReleaseKey(HID_KEYBOARD_SC_SPACE);
+                UsbKBrd.ReleaseAll();
+//                UsbKBrd.PressAndRelease(HID_KEYBOARD_SC_A);
+    //            Uart.Printf("Idle\r");
+            }
+            break;
+
+        case rsWaitIdle:
+            if(Sns0 == 0 and Sns1 == 0) {
+                RecState = rsIdle;
+            }
+            break;
+    } // switch
 }
 #endif
 

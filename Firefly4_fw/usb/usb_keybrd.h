@@ -20,9 +20,12 @@ public:
     void Init();
     void Connect();
     // Data
-    void PressKey(uint8_t KeyCode);
-    void DepressKey(uint8_t KeyCode);
+    void PressKey(uint8_t KeyCode, uint8_t Modifiers = 0);
+    void ReleaseKey(uint8_t KeyCode);
     void PressAndRelease(uint8_t KeyCode);
+    void PressModifier(uint8_t Modifier);
+    void ReleaseModifier(uint8_t Modifier);
+    void ReleaseAll();
     // Inner use
     uint8_t Protocol = 1;	// When initialized, all devices default to report protocol
     uint8_t IdleRate = 0;
