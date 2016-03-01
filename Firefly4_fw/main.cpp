@@ -87,8 +87,6 @@ static void RecCallback(void *p) {
 //    Uart.PrintfI("TO\r");
 }
 
-__unused static uint32_t cnt = 0;
-
 void App_t::ProcessValues(uint32_t Sns0, uint32_t Sns1) {
 //    Uart.Printf("%03u %03u\r\n", Sns0, Sns1);
     Sns0 = (Sns0 > SNS_THRESHOLD)? 1 : 0;
@@ -105,13 +103,12 @@ void App_t::ProcessValues(uint32_t Sns0, uint32_t Sns1) {
 
         case rsEnter:
             if(Sns1 == 1) {
-                Uart.Printf("%u\r", cnt++);
                 RecState = rsWaitIdle;
                 chVTReset(&TmrTimeout);
-                UsbKBrd.PressKey(HID_KEYBOARD_SC_SPACE, HID_KEYBOARD_MODIFIER_LEFTGUI);
+//                UsbKBrd.PressKey(HID_KEYBOARD_SC_SPACE, HID_KEYBOARD_MODIFIER_LEFTGUI);
 //                UsbKBrd.ReleaseKey(HID_KEYBOARD_SC_SPACE);
-                UsbKBrd.ReleaseAll();
-//                UsbKBrd.PressAndRelease(HID_KEYBOARD_SC_A);
+//                UsbKBrd.ReleaseAll();
+                UsbKBrd.PressAndRelease(HID_KEYBOARD_SC_A);
     //            Uart.Printf("Idle\r");
             }
             break;
