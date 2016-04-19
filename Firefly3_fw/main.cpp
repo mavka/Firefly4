@@ -20,6 +20,10 @@
 
 LedSequence_t Seq;
 
+const Color_t ColorTable[7] = {
+        clRed, clBlue, clGreen, clMagenta, clCyan, clYellow, clWhite
+};
+
 App_t App;
 
 void SaveToFlash();
@@ -95,8 +99,8 @@ int main(void) {
     if(!Iwdg.ResetOccured()) {
 #endif
         Uart.Printf("\r%S %S\r", APP_NAME, APP_VERSION);
-    LoadFromFlash();
-    Led.StartSequence(&Seq.Chunk[0]);
+//    LoadFromFlash();
+//    Led.StartSequence(&Seq.Chunk[0]);
 #if AUTO_OFF
     }
     Adc.Init();
@@ -120,14 +124,30 @@ int main(void) {
         if(Led.IsOff()) GoSleep();
     }
 #else
+
+    Seq.Chunk[0] = {csSetColor, 720, {0,4,0}};
+    Seq.Chunk[1] = {csEnd};
+
+    int N, PrevN = 0;
+#define CHANGE_DELAY_MS 9999
+
     while(true) {
-//        chThdSleepMilliseconds(720);
-//        Uart.Printf("aga\r");
-        uint32_t EvtMsk = chEvtWaitAny(ALL_EVENTS);
-        if(EvtMsk & EVTMSK_UART_NEW_CMD) {
-            App.OnCmd((Shell_t*)&Uart);
-            Uart.SignalCmdProcessed();
-        }
+        do {
+            N = rand() % 7;
+        } while (N == PrevN);
+        PrevN = N;
+
+        Uart.Printf("%d\r", N);
+        Seq.Chunk[0].Color = ColorTable[N];
+        Led.StartSequence(&Seq.Chunk[0]);
+
+        chThdSleepMilliseconds(CHANGE_DELAY_MS);
+
+//        uint32_t EvtMsk = chEvtWaitAny(ALL_EVENTS);
+//        if(EvtMsk & EVTMSK_UART_NEW_CMD) {
+//            App.OnCmd((Shell_t*)&Uart);
+//            Uart.SignalCmdProcessed();
+//        }
     }
 #endif
 }
