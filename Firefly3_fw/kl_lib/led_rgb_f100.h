@@ -65,6 +65,7 @@ public:
         chSysUnlock();
     }
     const LedChunk_t* GetCurrentSequence() { return IPStartChunk; }
+    bool IsOff() { return (ICurrColor == clBlack); }
     // Inner use
     void IStartSequenceI(const LedChunk_t *PLedChunk);
 };

@@ -703,7 +703,7 @@ public:
 };
 #endif // EXTI
 
-#if 0 // ============================== IWDG ===================================
+#if 1 // ============================== IWDG ===================================
 enum IwdgPre_t {
     iwdgPre4 = 0x00,
     iwdgPre8 = 0x01,
@@ -740,7 +740,7 @@ public:
     void GoSleep(uint32_t Timeout_ms) {
         chSysLock();
         // Start LSI
-        Clk.EnableLSI();
+        Clk.LsiEnable();
         // Start IWDG
         SetTimeout(Timeout_ms);
         Enable();

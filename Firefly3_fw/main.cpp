@@ -16,43 +16,28 @@
 #include "led_rgb_f100.h"
 #include "LedSequence.h"
 
-//#define LED_EMPTY_COLOR     ((Color_t){4, 4, 4})
-
-LedSequence_t Seq;
-
-const Color_t ColorTable[7] = {
-        clRed, clBlue, clGreen, clMagenta, clCyan, clYellow, clWhite
-};
-
 App_t App;
 
-void SaveToFlash();
-void LoadFromFlash();
+const LedChunk_t lsqOn[] = {
+        { csSetColor, 1800, {0, 180, 180} },
+        { csEnd }
+};
+const LedChunk_t lsqOff[] = {
+        { csSetColor, 1800, clBlack },
+        { csEnd }
+};
 
-#if 1 // ==== Save after a while ====
-#define SAVE_TIMEOUT_MS     9999    // Save to flash after this
-VirtualTimer TmrSave;
-
-void OnSaveTime(void *p) {
-    chSysLockFromIsr();
-    SaveToFlash();
-    chSysUnlockFromIsr();
-}
-void ResetSaveTimer() { chVTReset(&TmrSave);}
-void StartSaveTimer() { chVTSet(&TmrSave, MS2ST(SAVE_TIMEOUT_MS), &OnSaveTime, nullptr); }
-#endif
-
-#define AUTO_OFF    FALSE
+#define AUTO_OFF    TRUE
 
 #if AUTO_OFF
 Adc_t Adc;
 IWDG_t Iwdg;
-#define ADC_VALUE_TO_OFF    540
+#define ADC_VALUE_TO_OFF    504
 #define ADC_VALUE_TO_ON     198
 static inline void GoSleep();
 #endif
 
-#if 1 // ========================== Flash ======================================
+#if 0 // ========================== Flash ======================================
 #define FLASH_PAGE_SIZE     1024
 #define FLASH_KEY1          ((uint32_t)0x45670123)
 #define FLASH_KEY2          ((uint32_t)0xCDEF89AB)
@@ -118,8 +103,8 @@ int main(void) {
         Adc.Disable();
         rslt >>= 3;
         Uart.Printf("Adc: %u\r", rslt);
-        if(rslt > ADC_VALUE_TO_OFF) Led.SetColorSmoothly(clBlack);
-        if(rslt < ADC_VALUE_TO_ON)  Led.SetColorSmoothly(LED_COLOR);
+        if(rslt > ADC_VALUE_TO_OFF) Led.StartSequence(lsqOff);  //SetColorSmoothly(clBlack);
+        if(rslt < ADC_VALUE_TO_ON)  Led.StartSequence(lsqOn); //SetColorSmoothly(LED_COLOR);
         // Check if sleep
         if(Led.IsOff()) GoSleep();
     }
@@ -153,7 +138,7 @@ int main(void) {
 }
 #endif
 
-#if 1 // ========================== Uart cmd ===================================
+#if 0 // ========================== Uart cmd ===================================
 void App_t::OnCmd(Shell_t *PShell) {
     Cmd_t *PCmd = &PShell->Cmd;
     __attribute__((unused)) int32_t dw32 = 0;  // May be unused in some configurations
@@ -224,7 +209,7 @@ void GoSleep() {
 }
 #endif
 
-#if 1 // ======================== Flash load/save ==============================
+#if 0 // ======================== Flash load/save ==============================
 void LoadFromFlash() {
     memcpy(&Seq, &FlashSeq, LED_SEQ_SZ);
 }
